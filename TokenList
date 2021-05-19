@@ -1,0 +1,51 @@
+// Tokeny jednoznakowe
+LeftBrace // (
+RightBrace // )
+Comma // ,
+
+// Tokent wieloznakowe
+Assignment // <-
+Identifier // Identyfikator -> ciąg znaków zaczynający się dowolną literą a potem litery / cyfry
+
+// Tokeny związane z funckją
+FunctionKeyWord // FUNCTION
+FunctionResult // -> 
+FunctionParameters // :
+FunctionBodyStart // =
+
+// Typy
+Boolean // BOOLEAN
+Number // NUMBER
+NumberClosedInterval // NUMBER[SingleNumber..SingleNumber] np. NUMBER[15..17] => liczba 15 <= x <= 17
+NumberOpenInterval // NUMBER(SingleNumber..SingleNumber) np. NUMBER(15..17) => liczba 15 < x < 17
+ExactNumber // NUMBER<SingleNumber> np. NUMBER<3> => dokładnie 3
+String // STRING
+Function // FUNCTION
+Any // 🤷 => dowolny typ
+
+// Literały
+False // FALSE 
+True // TRUE
+NumberLiteral // dowolna liczba np. 1, 5, 22.22
+StringLiteral // "znaki" 
+
+// Operatory logiczne
+And // AND => tłumaczony na && w JS
+Or // OR => tłumaczony na || w JS
+Not // NOT => tłumaczony na ! w JS
+Equal // EQUALS => tłumaczony na == w JS
+Identical // IDENTICAL => tłumaczony na === w JS
+Greater // >
+GreaterEqual // >=
+Less // <
+LessEqual // <=
+
+// Operatory arytmetyczne 
+Plus // +
+Minus // -
+Multiplcation // *
+Power // ^
+Division // /
+
+// Pozostałe operatory
+Concat // CONCAT 
