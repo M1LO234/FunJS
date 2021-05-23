@@ -2,8 +2,9 @@
 
 Wstępna wersja gramatyki języka FunJS
 
-Kod wejściowy własnego języka funkcyjnego:
+#### Kod wejściowy własnego języka funkcyjnego:
 
+```
 FUNCTION: NUMBER , NUMBER -> NUMBER
 nazwa(x, y) =
 NUMBER n <- 23
@@ -18,9 +19,11 @@ nazwa2(x, y) =
 nazwa(23, 21)
 NUMBER n <- 23
 STRING str <- 44 + n + 56
+```
 
-Wygenerowany kod JS:
+#### Wygenerowany kod JS:
 
+```
 function nazwa(x, y) {
 var n = 23;
 var m = 23;
@@ -33,3 +36,4 @@ return x + y;
 nazwa(23, 21);
 var n = 23;
 var str = 44 + (n + 56);
+```
