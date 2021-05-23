@@ -20,14 +20,29 @@
     return obj;
   }
 
-  function funDeclaration(funcName, par1, par2, res) {
+  function funDeclaration(funcName, par, res) {
+    
+    var ops = [];
+    var params = [];
+
+    for (var i = 0; i < par.length; i++) {
+      params.push(par[i][0])
+    }
+
+    if (res[0].length > 0) {
+      for (var i = 0; i < res[0].length; i++) {
+        ops.push(res[0][i]);
+      }
+    }
+    ops.push(res[1]);
+
     var obj = {
       type: "FunctionDeclaration",
       id: funcName,
-      params: [par1, par2.length > 0 ? par2[0][1] : {type:"Literal", value: null}],
+      params: params,
       body: {
         type: "BlockStatement",
-        "body": res
+        "body": ops
       },
       "generator": false,
       "expression": false,
@@ -64,6 +79,20 @@
     return obj;
   }
 
+  function varAssignment(ident, expression) {
+    var obj = {
+      "type": "ExpressionStatement",
+      "expression": {
+        "type": "AssignmentExpression",
+        "operator": "=",
+        "left": ident,
+        "right": expression
+      }
+    }
+
+    return obj;
+  }
+
   function retStatement(ops) {
     var obj = {
       "type": "ReturnStatement",
@@ -83,16 +112,21 @@ Start = _ program:Program _ { return program; }
 
 Statement
   =  VariableDeclaration
+  / VariableAssignment
   / FunctionStatement
   / FunctionExpression
 
-InnerStatements
+ArithmeticsStatements
   = AddStatement
   / SubStatement
   / MulStatement
   / DivStatement
   / PowStatement
   / SingleLiteral
+
+InnerStatements
+  = VariableAssignment
+  / ArithmeticsStatements
   / VariableDeclaration
 
 SingleLiteral
@@ -111,40 +145,45 @@ Type
   / NUMBER
 
 AddStatement
-  = val1:SingleLiteral _ Plus _ val2:SingleLiteral _ {
+  = val1:SingleLiteral _ Plus _ val2:ArithmeticsStatements _ {
     return binaryExp("+", val1, val2);
   }
 
 SubStatement
-  = val1:SingleLiteral _ Minus _ val2:SingleLiteral _ {
+  = val1:SingleLiteral _ Minus _ val2:ArithmeticsStatements _ {
     return binaryExp("-", val1, val2);
   }
 
 MulStatement
-  = val1:SingleLiteral _ Multiplication _ val2:SingleLiteral _ {
+  = val1:SingleLiteral _ Multiplication _ val2:ArithmeticsStatements _ {
     return binaryExp("*", val1, val2);
   }
 
 DivStatement
-  = val1:SingleLiteral _ Division _ val2:SingleLiteral _ {
+  = val1:SingleLiteral _ Division _ val2:ArithmeticsStatements _ {
     return binaryExp("/", val1, val2);
   }
 
 PowStatement
-  = val1:SingleLiteral _ Power _ val2:SingleLiteral _ {
+  = val1:SingleLiteral _ Power _ val2:ArithmeticsStatements _ {
     return binaryExp("^", val1, val2);
   }
 
 VariableDeclaration
-  = _ Type _ ident:Identifier _ Assignment _ statement:InnerStatements {
+  = _ Type _ ident:Identifier _ Assignment _ statement:InnerStatements _ {
     return varDeclaration(ident, statement);
+  }
+
+VariableAssignment
+  = _ ident:Identifier _ Assignment _ statement:InnerStatements {
+    return varAssignment(ident, statement)
   }
 
 FunctionStatement
   = FunctionKeyWord FunctionParameters _ Type (_ Comma _ Type )* _ FunctionResult _ Type _ 
-  func:Identifier LeftBrace par1:Identifier (Comma)* par2:( _ Identifier )* RightBrace _ FunctionBodyStart
+  func:Identifier LeftBrace par:(Identifier Comma* _ )* RightBrace _ FunctionBodyStart
    _  res:FunctionBody {
-    return funDeclaration(func, par1, par2, res);
+    return funDeclaration(func, par, res);
   }
 
 FunctionExpression
@@ -153,11 +192,11 @@ FunctionExpression
   }
 
 FunctionBody
-  = ops:InnerStatements _ ret:ReturnStatement {
+  = _ ops:(InnerStatements)* _ ret:ReturnStatement {
     return [ops, ret]
   }
   / ret: ReturnStatement{
-    return [ret]
+    return [[], ret]
   }
 
 ReturnStatement
@@ -179,13 +218,6 @@ StringLiteral
   =  _ '"' chars:([a-z0-9_]+) '"' _ { 
     return literal(chars.join(""));
    }
-
-NumberClosedInterval 
-  = NUMBER+"[" + NumberLiteral+".."+NumberLiteral+"]"
-NumberOpenInterval
-  = NUMBER+"("+NumberLiteral+".."+NumberLiteral+")"
-ExactNumber
-  = NUMBER+"<"+NumberLiteral+">"
 
 LeftBrace = "("
 RightBrace = ")"
@@ -217,6 +249,12 @@ Multiplication = "*"
 Power = "^"
 Division = "/"
 Concat = "CONCAT"
+NumberClosedInterval 
+  = NUMBER+"[" + NumberLiteral+".."+NumberLiteral+"]"
+NumberOpenInterval
+  = NUMBER+"("+NumberLiteral+".."+NumberLiteral+")"
+ExactNumber
+  = NUMBER+"<"+NumberLiteral+">"
 
 Program
   = body:SourceElements? {
