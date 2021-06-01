@@ -1,6 +1,7 @@
 var ast = require("escodegen");
 var peg = require("./grammar.js");
-var over = require("./overloading.js");
+// var over = require("./overloading.js");
+var fs = require("fs");
 
 var toParse = `FUNCTION: NUMBER , NUMBER -> NUMBER
 nazwa(x) = NUMBER n <- 23 -> x + n
@@ -15,16 +16,16 @@ STRING str <- 44 + n
 
 var toParse2 = `FUNCTION: NUMBER , NUMBER -> NUMBER
 nazwa(x, y) = 
-    NUMBER n <- 23 
-    NUMBER m <- 23
+    VARIABLE n <- 23 
+    VARIABLE m <- 23
     m <- n + 34 * 9 / 93
     -> x + n + y + m
 
-FUNCTION: NUMBER , NUMBER -> NUMBER
+FUNCTION: STRING , NUMBER, NUMBER -> NUMBER
 nazwa(x, y, z) =
     -> x + y + z
 
-FUNCTION: NUMBER , NUMBER -> NUMBER
+FUNCTION: NUMBER , NUMBER, NUMBER, NUMBER -> NUMBER
 nazwa(x, y, z, t) =
     -> x + y + z + t
 
@@ -32,18 +33,26 @@ FUNCTION: NUMBER , NUMBER -> NUMBER
 nazwa2(x, y) = 
     -> x + y
 
-FUNCTION: NUMBER , NUMBER -> NUMBER
+FUNCTION: NUMBER -> NUMBER
 nazwa2(x) = 
-    NUMBER u <- 23
-    -> x + u
+VARIABLE u <- 23
+VARIABLE z <- x(u)
+    -> x(u)
 
-nazwa(23, 21)
-NUMBER n <- 23
-STRING str <- 44 + n + 56
+START nazwa2(1, 2)
 `;
 
 var result = peg.parse(toParse2);
-var overrideResult = over.overload(result);
-var code = ast.generate(overrideResult);
+// console.log(result);
+// fs.writeFile("test.json", JSON.stringify(result, null, 4), function (err) {
+//   if (err) {
+//     console.log(err);
+//   } else {
+//     console.log("JSON saved to test.json");
+//   }
+// });
+
+// var overrideResult = over.overload(result);
+var code = ast.generate(result);
 
 console.log(code);
