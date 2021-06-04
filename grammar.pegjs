@@ -1,5 +1,102 @@
 
 {
+  function errorGuardBody(type) {
+    return {
+        "type": "BlockStatement",
+        "body": [
+          {
+            "type": "IfStatement",
+            "test": {
+              "type": "BinaryExpression",
+              "operator": "===",
+              "left": {
+                "type": "UnaryExpression",
+                "operator": "typeof",
+                "argument": {
+                  "type": "Identifier",
+                  "name": "x"
+                },
+                "prefix": true
+              },
+              "right": {
+                "type": "Literal",
+                "value": type
+              }
+            },
+            "consequent": {
+              "type": "BlockStatement",
+              "body": [
+                {
+                  "type": "ReturnStatement",
+                  "argument": {
+                    "type": "Literal",
+                    "value": true,
+                    "raw": "true"
+                  }
+                }
+              ]
+            },
+            "alternate": {
+              "type": "BlockStatement",
+              "body": [
+                {
+                  "type": "ExpressionStatement",
+                  "expression": {
+                    "type": "CallExpression",
+                    "callee": {
+                      "type": "MemberExpression",
+                      "computed": false,
+                      "object": {
+                        "type": "Identifier",
+                        "name": "console"
+                      },
+                      "property": {
+                        "type": "Identifier",
+                        "name": "log"
+                      }
+                    },
+                    "arguments": [
+                      {
+                        "type": "TemplateLiteral",
+                        "quasis": [
+                          {
+                            "type": "TemplateElement",
+                            "value": {
+                              "raw": `Expected parameter type: ${type}, but `,
+                            },
+                            "tail": false
+                          },
+                          {
+                            "type": "TemplateElement",
+                            "value": {
+                              "raw": " was given.",
+                              "cooked": " was given."
+                            },
+                            "tail": true
+                          }
+                        ],
+                        "expressions": [
+                          {
+                            "type": "UnaryExpression",
+                            "operator": "typeof",
+                            "argument": {
+                              "type": "Identifier",
+                              "name": "x"
+                            },
+                            "prefix": true
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+  }
+
   const typeHandler = (() => {
      const booleanGuard = {
        type: "FunctionDeclaration",
@@ -13,31 +110,7 @@
            name: "x",
          }
        ],
-       body: {
-         type: "BlockStatement",
-         body: [
-           {
-             type: "ReturnStatement",
-             argument: {
-               type: "BinaryExpression",
-               operator: "===",
-               left: {
-                 type: "UnaryExpression",
-                 operator: "typeof",
-                 argument: {
-                   type: "Identifier",
-                   name: "x",
-                 },
-                 prefix: true,
-               },
-               right: {
-                 type: "Literal",
-                 value: "boolean",
-               }
-             }
-           }
-         ],
-       },
+       body: errorGuardBody("boolean"),
        generator: false,
        expression: false,
        async: false
@@ -54,31 +127,7 @@
            name: "x",
          }
        ],
-       body: {
-         type: "BlockStatement",
-         body: [
-           {
-             type: "ReturnStatement",
-             argument: {
-               type: "BinaryExpression",
-               operator: "===",
-               left: {
-                 type: "UnaryExpression",
-                 operator: "typeof",
-                 argument: {
-                   type: "Identifier",
-                   name: "x",
-                 },
-                 prefix: true,
-               },
-               right: {
-                 type: "Literal",
-                 value: "number",
-               }
-             }
-           }
-         ],
-       },
+       body: errorGuardBody("number"),
        generator: false,
        expression: false,
        async: false
@@ -318,31 +367,7 @@
            name: "x",
          }
        ],
-       body: {
-         type: "BlockStatement",
-         body: [
-           {
-             type: "ReturnStatement",
-             argument: {
-               type: "BinaryExpression",
-               operator: "===",
-               left: {
-                 type: "UnaryExpression",
-                 operator: "typeof",
-                 argument: {
-                   type: "Identifier",
-                   name: "x",
-                 },
-                 prefix: true,
-               },
-               right: {
-                 type: "Literal",
-                 value: "string",
-               }
-             }
-           }
-         ],
-       },
+       body: errorGuardBody("string"),
        generator: false,
        expression: false,
        async: false
@@ -359,31 +384,7 @@
            name: "x",
          }
        ],
-       body: {
-         type: "BlockStatement",
-         body: [
-           {
-             type: "ReturnStatement",
-             argument: {
-               type: "BinaryExpression",
-               operator: "===",
-               left: {
-                 type: "UnaryExpression",
-                 operator: "typeof",
-                 argument: {
-                   type: "Identifier",
-                   name: "x",
-                 },
-                 prefix: true,
-               },
-               right: {
-                 type: "Literal",
-                 value: "function",
-               }
-             }
-           }
-         ],
-       },
+       body: errorGuardBody("function"),
        generator: false,
        expression: false,
        async: false
@@ -734,7 +735,44 @@ const overload = function (parsedAST) {
     var obj = { type: "Literal", value: val }
     return obj;
   }
-  
+
+  function negativeLiteral(val) {
+    return {
+      "type": "UnaryExpression",
+      "operator": "-",
+      "argument": {
+        "type": "Literal",
+        "value": val
+      },
+      "prefix": true
+    }
+  }
+
+  function print(exp) {
+    var obj = {
+      "type": "ExpressionStatement",
+      "expression": {
+        "type": "CallExpression",
+        "callee": {
+          "type": "MemberExpression",
+          "computed": false,
+          "object": {
+            "type": "Identifier",
+            "name": "console"
+          },
+          "property": {
+            "type": "Identifier",
+            "name": "log"
+          }
+        },
+        arguments: [
+          exp
+        ]
+      }
+    }
+    return obj;
+  }
+    
 }
 
 Start = _ program:Program _ { return program; }
@@ -750,6 +788,7 @@ ArithmeticsStatements
 InnerStatements
   = VariableAssignment
   / VariableDeclaration
+  / PrintStatement
 
 Expression
  = FunctionExpression
@@ -792,7 +831,7 @@ DivStatement
 
 PowStatement
   = val1:SingleLiteral _ Power _ val2:ArithmeticsStatements _ {
-    return binaryExp("^", val1, val2);
+    return binaryExp("**", val1, val2);
   }
 
 VariableDeclaration
@@ -832,6 +871,11 @@ ReturnStatement
     return retStatement(ops);
   }
 
+PrintStatement
+  = _ PrintToken _ exp:Expression {
+    return print(exp);
+  }
+
 StartStatement
   = _ KeywordStart _ exp:FunctionExpression _ {
     return {type: "Start",
@@ -844,8 +888,8 @@ NumberLiteral
   = _ digits:([0-9]+ "." [0-9]+) _ { 
       return literal(Number(digits.flat().join("")))
     }
-  / _ digits:[0-9]+ _ { 
-      return literal(Number(digits.join("")));
+  / _ sign:"-"? digits:([0-9]+) _ { 
+      return sign ? negativeLiteral(Number(digits.join(""))) : literal(Number(digits.join("")));
     }
 
 StringLiteral 
@@ -854,6 +898,7 @@ StringLiteral
    }
 
 KeywordStart = "START"
+PrintToken = "PRINT"
 LeftBrace = "("
 RightBrace = ")"
 Comma = ","
@@ -862,7 +907,7 @@ FunctionKeyWord = "FUNCTION"
 FunctionResult = "->" 
 FunctionParameters = ":"
 FunctionBodyStart = "="
-Boolean = "BOOLEAN" { return (typeHandler.registerTypeUsage("Boolean"), typeHandler.getGuardFactory("Boolena")) }
+Boolean = "BOOLEAN" { return (typeHandler.registerTypeUsage("Boolean"), typeHandler.getGuardFactory("Boolean")) }
 String = "STRING" { return (typeHandler.registerTypeUsage("String"), typeHandler.getGuardFactory("String")) }
 Function = "CALLABLE" { return (typeHandler.registerTypeUsage("Function"), typeHandler.getGuardFactory("Function")) }
 Any = "🤷" { return (typeHandler.registerTypeUsage("Any"), typeHandler.getGuardFactory("Any")) }
@@ -887,9 +932,9 @@ Concat = "CONCAT"
 Variable = "VARIABLE"
 NumberClosedInterval = Number + "[" + from:NumberLiteral + ".." + to:NumberLiteral + "]" 
    { return (typeHandler.registerTypeUsage("NumberClosedInterval"), typeHandler.getGuardFactory("NumberClosedInterval", from, to)); }
- NumberOpenInterval = Number + "(" + from:NumberLiteral + ".." + to:NumberLiteral + ")"
+NumberOpenInterval = Number + "(" + from:NumberLiteral + ".." + to:NumberLiteral + ")"
    { return (typeHandler.registerTypeUsage("NumberOpenInterval"), typeHandler.getGuardFactory("NumberOpenInterval", from, to)); }
- ExactNumber = Number + "<" + value:NumberLiteral + ">"
+ExactNumber = Number + "<" + value:NumberLiteral + ">"
    { return (typeHandler.registerTypeUsage("ExactNumber"), typeHandler.getGuardFactory("ExactNumber", value)); }
 
 Program

@@ -7,69 +7,88 @@ Wstępna wersja gramatyki języka FunJS
 ```
 FUNCTION: NUMBER , NUMBER -> NUMBER
 nazwa(x, y) =
-    NUMBER n <- 23
-    NUMBER m <- 23
-    m <- n + 34 * 9 / 93
+    VARIABLE n <- 23
+    VARIABLE m <- -23
+    m <- n + 34 * 9 / -93
     -> x + n + y + m
 
-FUNCTION: NUMBER , NUMBER -> NUMBER
+FUNCTION: STRING, NUMBER, NUMBER -> NUMBER
 nazwa(x, y, z) =
     -> x + y + z
 
 FUNCTION: NUMBER , NUMBER -> NUMBER
+nazwa2(x, y) =
+  VARIABLE z <- x ^ y
+  PRINT z
+    -> z
+
+FUNCTION: NUMBER , NUMBER, NUMBER, NUMBER -> NUMBER
 nazwa(x, y, z, t) =
     -> x + y + z + t
 
-FUNCTION: NUMBER , NUMBER -> NUMBER
-nazwa2(x, y) =
-    -> x + y
-
-FUNCTION: NUMBER , NUMBER -> NUMBER
+FUNCTION: NUMBER -> NUMBER
 nazwa2(x) =
-    NUMBER u <- 23
-    -> x + u
+    VARIABLE u <- 23
+    VARIABLE z <- x(u)
+    -> x(u)
 
-nazwa(23, 21)
-NUMBER n <- 23
-STRING str <- 44 + n + 56
+START nazwa2(-5, 3)
 ```
 
 #### Wygenerowany kod JS:
 
 ```
+function isNumber(x) {
+    if (typeof x === 'number') {
+        return true;
+    } else {
+        console.log(`Expected parameter type: number, but ${ typeof x } was given.`);
+    }
+}
+function isString(x) {
+    if (typeof x === 'string') {
+        return true;
+    } else {
+        console.log(`Expected parameter type: string, but ${ typeof x } was given.`);
+    }
+}
 function nazwa(p1, p2, p3, p4) {
-    if (arguments.length == 2) {
-        var x = p1;
-        var y = p2;
+    var x = p1;
+    var y = p2;
+    if (arguments.length == 2 && isNumber(p1) && isNumber(p2)) {
         var n = 23;
-        var m = 23;
-        m = n + 34 * (9 / 93);
+        var m = -23;
+        m = n + 34 * (9 / -93);
         return x + (n + (y + m));
     }
-    if (arguments.length == 3) {
-        var x = p1;
-        var y = p2;
-        var z = p3;
+    var x = p1;
+    var y = p2;
+    var z = p3;
+    if (arguments.length == 3 && isString(p1) && isNumber(p2) && isNumber(p3)) {
         return x + (y + z);
     }
-    if (arguments.length == 4) {
-        var x = p1;
-        var y = p2;
-        var z = p3;
-        var t = p4;
+    var x = p1;
+    var y = p2;
+    var z = p3;
+    var t = p4;
+    if (arguments.length == 4 && isNumber(p1) && isNumber(p2) && isNumber(p3) && isNumber(p4)) {
         return x + (y + (z + t));
     }
 }
 function nazwa2(p1, p2) {
-    if (arguments.length == 2) {
-        var x = p1;
-        var y = p2;
-        return x + y;
+    var x = p1;
+    var y = p2;
+    if (arguments.length == 2 && isNumber(p1) && isNumber(p2)) {
+        var z = x ** y;
+        console.log(z);
+        return z;
     }
-    if (arguments.length == 1) {
-        var x = p1;
+    var x = p1;
+    if (arguments.length == 1 && isNumber(p1)) {
         var u = 23;
-        return x + u;
+        var z = x(u);
+        return x(u);
     }
 }
+(nazwa2(-5, 3))
 ```
