@@ -41,54 +41,39 @@
               "body": [
                 {
                   "type": "ExpressionStatement",
-                  "expression": {
-                    "type": "CallExpression",
-                    "callee": {
-                      "type": "MemberExpression",
-                      "computed": false,
-                      "object": {
-                        "type": "Identifier",
-                        "name": "console"
-                      },
-                      "property": {
-                        "type": "Identifier",
-                        "name": "log"
-                      }
-                    },
-                    "arguments": [
-                      {
-                        "type": "TemplateLiteral",
-                        "quasis": [
-                          {
-                            "type": "TemplateElement",
-                            "value": {
-                              "raw": `Expected parameter type: ${type}, but `,
-                            },
-                            "tail": false
+                  "expression": throwStatement(
+                    {
+                      "type": "TemplateLiteral",
+                      "quasis": [
+                        {
+                          "type": "TemplateElement",
+                          "value": {
+                            "raw": `Expected parameter type: ${type}, but `,
                           },
-                          {
-                            "type": "TemplateElement",
-                            "value": {
-                              "raw": " was given.",
-                              "cooked": " was given."
-                            },
-                            "tail": true
-                          }
-                        ],
-                        "expressions": [
-                          {
-                            "type": "UnaryExpression",
-                            "operator": "typeof",
-                            "argument": {
-                              "type": "Identifier",
-                              "name": "x"
-                            },
-                            "prefix": true
-                          }
-                        ]
-                      }
-                    ]
-                  }
+                          "tail": false
+                        },
+                        {
+                          "type": "TemplateElement",
+                          "value": {
+                            "raw": " was given.",
+                            "cooked": " was given."
+                          },
+                          "tail": true
+                        }
+                      ],
+                      "expressions": [
+                        {
+                          "type": "UnaryExpression",
+                          "operator": "typeof",
+                          "argument": {
+                            "type": "Identifier",
+                            "name": "x"
+                          },
+                          "prefix": true
+                        }
+                      ]
+                    }
+                  )
                 }
               ]
             }
@@ -491,6 +476,20 @@
     };
   }
 
+  function throwStatement(...args) {
+    return {
+      "type": "ThrowStatement",
+      "argument": {
+        "type": "NewExpression",
+        "callee": {
+          "type": "Identifier",
+          "name": "Error"
+        },
+        "arguments": args
+      }
+    }
+  }
+
   function ifStatement(conditions, body) {
   return {
     type: "IfStatement",
@@ -792,11 +791,20 @@ InnerStatements
 
 Expression
  = FunctionExpression
+ / ConcatExpression
  / ArithmeticsStatements
 
 SingleLiteral
   = StringLiteral
   / NumberLiteral 
+  / Identifier
+
+NumericLiteral 
+  = NumberLiteral 
+  / Identifier
+
+StringLikeLiteral
+  = StringLiteral
   / Identifier
 
 Type
@@ -809,28 +817,33 @@ Type
   / Any
   / Number
 
+ConcatExpression
+  = val1:StringLikeLiteral _ Concat _ val2:StringLikeLiteral _ {
+    return binaryExp("+", val1, val2);
+  }
+
 AddStatement
-  = val1:SingleLiteral _ Plus _ val2:ArithmeticsStatements _ {
+  = val1:NumericLiteral _ Plus _ val2:ArithmeticsStatements _ {
     return binaryExp("+", val1, val2);
   }
 
 SubStatement
-  = val1:SingleLiteral _ Minus _ val2:ArithmeticsStatements _ {
+  = val1:NumericLiteral _ Minus _ val2:ArithmeticsStatements _ {
     return binaryExp("-", val1, val2);
   }
 
 MulStatement
-  = val1:SingleLiteral _ Multiplication _ val2:ArithmeticsStatements _ {
+  = val1:NumericLiteral _ Multiplication _ val2:ArithmeticsStatements _ {
     return binaryExp("*", val1, val2);
   }
 
 DivStatement
-  = val1:SingleLiteral _ Division _ val2:ArithmeticsStatements _ {
+  = val1:NumericLiteral _ Division _ val2:ArithmeticsStatements _ {
     return binaryExp("/", val1, val2);
   }
 
 PowStatement
-  = val1:SingleLiteral _ Power _ val2:ArithmeticsStatements _ {
+  = val1:NumericLiteral _ Power _ val2:ArithmeticsStatements _ {
     return binaryExp("**", val1, val2);
   }
 
@@ -893,7 +906,7 @@ NumberLiteral
     }
 
 StringLiteral 
-  =  _ '"' chars:([a-z0-9_]+) '"' _ { 
+  =  _ '"' chars:([A-Za-z0-9_ ]+) '"' _ { 
     return literal(chars.join(""));
    }
 
@@ -911,6 +924,12 @@ Boolean = "BOOLEAN" { return (typeHandler.registerTypeUsage("Boolean"), typeHand
 String = "STRING" { return (typeHandler.registerTypeUsage("String"), typeHandler.getGuardFactory("String")) }
 Function = "CALLABLE" { return (typeHandler.registerTypeUsage("Function"), typeHandler.getGuardFactory("Function")) }
 Any = "🤷" { return (typeHandler.registerTypeUsage("Any"), typeHandler.getGuardFactory("Any")) }
+NumberClosedInterval = Number + "[" + from:NumberLiteral + ".." + to:NumberLiteral + "]"
+   { return (typeHandler.registerTypeUsage("NumberClosedInterval"), typeHandler.getGuardFactory("NumberClosedInterval", from[0], to[0])); }
+NumberOpenInterval = Number + "(" + from:NumberLiteral + ".." + to:NumberLiteral + ")"
+   { return (typeHandler.registerTypeUsage("NumberOpenInterval"), typeHandler.getGuardFactory("NumberOpenInterval", from[0], to[0])); }
+ExactNumber = Number + "<" + value:NumberLiteral + ">"
+   { return (typeHandler.registerTypeUsage("ExactNumber"), typeHandler.getGuardFactory("ExactNumber", value[0])); }
 Number = "NUMBER" { return (typeHandler.registerTypeUsage("Number"), typeHandler.getGuardFactory("Number")) }
 False = "FALSE"
 True = "TRUE"
@@ -930,12 +949,6 @@ Power = "^"
 Division = "/"
 Concat = "CONCAT"
 Variable = "VARIABLE"
-NumberClosedInterval = Number + "[" + from:NumberLiteral + ".." + to:NumberLiteral + "]" 
-   { return (typeHandler.registerTypeUsage("NumberClosedInterval"), typeHandler.getGuardFactory("NumberClosedInterval", from, to)); }
-NumberOpenInterval = Number + "(" + from:NumberLiteral + ".." + to:NumberLiteral + ")"
-   { return (typeHandler.registerTypeUsage("NumberOpenInterval"), typeHandler.getGuardFactory("NumberOpenInterval", from, to)); }
-ExactNumber = Number + "<" + value:NumberLiteral + ">"
-   { return (typeHandler.registerTypeUsage("ExactNumber"), typeHandler.getGuardFactory("ExactNumber", value)); }
 
 Program
   = body:SourceElements? {

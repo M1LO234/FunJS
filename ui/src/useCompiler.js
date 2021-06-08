@@ -7,7 +7,7 @@ const createErrorMessage = (error) => {
 Location: line ${error.location.start.line}, column ${error.location.start.column}.`
 }
 
-export function useGrammar () {
+export function useCompiler () {
   const [input, setInput] = React.useState('');
   const [error, setError] = React.useState('')
   const [code, setCode] = React.useState('');
@@ -19,8 +19,13 @@ export function useGrammar () {
       setError('');
       setCode(output)
     } catch (error) {
-      setError(createErrorMessage(error));
-      setCode('');
+      try {
+        setError(createErrorMessage(error));
+        setCode('');
+      } catch {
+        setError('Unexpected error');
+        setCode('');
+      }
     }
   }, [input])
 

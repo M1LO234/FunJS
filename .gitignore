@@ -1,4 +1,4 @@
 .idea/
 
-./ui/node_modules/
-./ui/.idea/
+ui/node_modules/
+ui/.idea/
