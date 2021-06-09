@@ -1,0 +1,23 @@
+FUNCTION: NUMBER<0> -> NUMBER
+fib(_) =
+  -> 0
+
+FUNCTION: NUMBER<1> -> NUMBER
+fib(_) =
+  -> 1
+
+FUNCTION: NUMBER -> NUMBER
+fib(x) =
+  VARIABLE a <- x-1
+  VARIABLE b <- fib(a)
+  VARIABLE c <- x-2
+  VARIABLE d <- fib(c)
+  -> b + d
+
+FUNCTION: NUMBER -> NUMBER
+run(x) =
+  VARIABLE a <- fib(x)
+  PRINT a
+  -> 0
+
+START run(8)
