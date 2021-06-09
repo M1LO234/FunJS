@@ -7,17 +7,19 @@
 "use strict";
 
 function peg$subclass(child, parent) {
-  function ctor() { this.constructor = child; }
+  function ctor() {
+    this.constructor = child;
+  }
   ctor.prototype = parent.prototype;
   child.prototype = new ctor();
 }
 
 function peg$SyntaxError(message, expected, found, location) {
-  this.message  = message;
+  this.message = message;
   this.expected = expected;
-  this.found    = found;
+  this.found = found;
   this.location = location;
-  this.name     = "SyntaxError";
+  this.name = "SyntaxError";
 
   if (typeof Error.captureStackTrace === "function") {
     Error.captureStackTrace(this, peg$SyntaxError);
@@ -26,37 +28,40 @@ function peg$SyntaxError(message, expected, found, location) {
 
 peg$subclass(peg$SyntaxError, Error);
 
-peg$SyntaxError.buildMessage = function(expected, found) {
+peg$SyntaxError.buildMessage = function (expected, found) {
   var DESCRIBE_EXPECTATION_FNS = {
-        literal: function(expectation) {
-          return "\"" + literalEscape(expectation.text) + "\"";
-        },
+    literal: function (expectation) {
+      return '"' + literalEscape(expectation.text) + '"';
+    },
 
-        "class": function(expectation) {
-          var escapedParts = "",
-              i;
+    class: function (expectation) {
+      var escapedParts = "",
+        i;
 
-          for (i = 0; i < expectation.parts.length; i++) {
-            escapedParts += expectation.parts[i] instanceof Array
-              ? classEscape(expectation.parts[i][0]) + "-" + classEscape(expectation.parts[i][1])
-              : classEscape(expectation.parts[i]);
-          }
+      for (i = 0; i < expectation.parts.length; i++) {
+        escapedParts +=
+          expectation.parts[i] instanceof Array
+            ? classEscape(expectation.parts[i][0]) +
+              "-" +
+              classEscape(expectation.parts[i][1])
+            : classEscape(expectation.parts[i]);
+      }
 
-          return "[" + (expectation.inverted ? "^" : "") + escapedParts + "]";
-        },
+      return "[" + (expectation.inverted ? "^" : "") + escapedParts + "]";
+    },
 
-        any: function(expectation) {
-          return "any character";
-        },
+    any: function (expectation) {
+      return "any character";
+    },
 
-        end: function(expectation) {
-          return "end of input";
-        },
+    end: function (expectation) {
+      return "end of input";
+    },
 
-        other: function(expectation) {
-          return expectation.description;
-        }
-      };
+    other: function (expectation) {
+      return expectation.description;
+    },
+  };
 
   function hex(ch) {
     return ch.charCodeAt(0).toString(16).toUpperCase();
@@ -64,28 +69,36 @@ peg$SyntaxError.buildMessage = function(expected, found) {
 
   function literalEscape(s) {
     return s
-      .replace(/\\/g, '\\\\')
-      .replace(/"/g,  '\\"')
-      .replace(/\0/g, '\\0')
-      .replace(/\t/g, '\\t')
-      .replace(/\n/g, '\\n')
-      .replace(/\r/g, '\\r')
-      .replace(/[\x00-\x0F]/g,          function(ch) { return '\\x0' + hex(ch); })
-      .replace(/[\x10-\x1F\x7F-\x9F]/g, function(ch) { return '\\x'  + hex(ch); });
+      .replace(/\\/g, "\\\\")
+      .replace(/"/g, '\\"')
+      .replace(/\0/g, "\\0")
+      .replace(/\t/g, "\\t")
+      .replace(/\n/g, "\\n")
+      .replace(/\r/g, "\\r")
+      .replace(/[\x00-\x0F]/g, function (ch) {
+        return "\\x0" + hex(ch);
+      })
+      .replace(/[\x10-\x1F\x7F-\x9F]/g, function (ch) {
+        return "\\x" + hex(ch);
+      });
   }
 
   function classEscape(s) {
     return s
-      .replace(/\\/g, '\\\\')
-      .replace(/\]/g, '\\]')
-      .replace(/\^/g, '\\^')
-      .replace(/-/g,  '\\-')
-      .replace(/\0/g, '\\0')
-      .replace(/\t/g, '\\t')
-      .replace(/\n/g, '\\n')
-      .replace(/\r/g, '\\r')
-      .replace(/[\x00-\x0F]/g,          function(ch) { return '\\x0' + hex(ch); })
-      .replace(/[\x10-\x1F\x7F-\x9F]/g, function(ch) { return '\\x'  + hex(ch); });
+      .replace(/\\/g, "\\\\")
+      .replace(/\]/g, "\\]")
+      .replace(/\^/g, "\\^")
+      .replace(/-/g, "\\-")
+      .replace(/\0/g, "\\0")
+      .replace(/\t/g, "\\t")
+      .replace(/\n/g, "\\n")
+      .replace(/\r/g, "\\r")
+      .replace(/[\x00-\x0F]/g, function (ch) {
+        return "\\x0" + hex(ch);
+      })
+      .replace(/[\x10-\x1F\x7F-\x9F]/g, function (ch) {
+        return "\\x" + hex(ch);
+      });
   }
 
   function describeExpectation(expectation) {
@@ -94,7 +107,8 @@ peg$SyntaxError.buildMessage = function(expected, found) {
 
   function describeExpected(expected) {
     var descriptions = new Array(expected.length),
-        i, j;
+      i,
+      j;
 
     for (i = 0; i < expected.length; i++) {
       descriptions[i] = describeExpectation(expected[i]);
@@ -120,200 +134,258 @@ peg$SyntaxError.buildMessage = function(expected, found) {
         return descriptions[0] + " or " + descriptions[1];
 
       default:
-        return descriptions.slice(0, -1).join(", ")
-          + ", or "
-          + descriptions[descriptions.length - 1];
+        return (
+          descriptions.slice(0, -1).join(", ") +
+          ", or " +
+          descriptions[descriptions.length - 1]
+        );
     }
   }
 
   function describeFound(found) {
-    return found ? "\"" + literalEscape(found) + "\"" : "end of input";
+    return found ? '"' + literalEscape(found) + '"' : "end of input";
   }
 
-  return "Expected " + describeExpected(expected) + " but " + describeFound(found) + " found.";
+  return (
+    "Expected " +
+    describeExpected(expected) +
+    " but " +
+    describeFound(found) +
+    " found."
+  );
 };
 
 function peg$parse(input, options) {
   options = options !== void 0 ? options : {};
 
   var peg$FAILED = {},
-
-      peg$startRuleFunctions = { Start: peg$parseStart },
-      peg$startRuleFunction  = peg$parseStart,
-
-      peg$c0 = function(program) { return program; },
-      peg$c1 = function(val1, val2) {
-          return binaryExp("+", val1, val2);
-        },
-      peg$c2 = function(val1, val2) {
-          return binaryExp("-", val1, val2);
-        },
-      peg$c3 = function(val1, val2) {
-          return binaryExp("*", val1, val2);
-        },
-      peg$c4 = function(val1, val2) {
-          return binaryExp("/", val1, val2);
-        },
-      peg$c5 = function(val1, val2) {
-          return binaryExp("**", val1, val2);
-        },
-      peg$c6 = function(ident, statement) {
-          return varDeclaration(ident, statement);
-        },
-      peg$c7 = function(ident, statement) {
-          return varAssignment(ident, statement)
-        },
-      peg$c8 = function(type1, type2, func, par, res) {
-          const types = [type1, ...type2.map(array => array[3])];
-          return funDeclaration(func, par, res, types);
-        },
-      peg$c9 = function(func, par1, par2) {
-          const pars = [par1, ...par2.map(array => array[3])]
-          return funcCall(func, ...pars);
-        },
-      peg$c10 = function(ops, ret) {
-          return [ops, ret]
-        },
-      peg$c11 = function(ret) {
-          return [[], ret]
-        },
-      peg$c12 = function(ops) {
-          return retStatement(ops);
-        },
-      peg$c13 = function(exp) {
-          return print(exp);
-        },
-      peg$c14 = function(exp) {
-          return {type: "Start",
-          exp};
-        },
-      peg$c15 = /^[a-z0-9_]/,
-      peg$c16 = peg$classExpectation([["a", "z"], ["0", "9"], "_"], false, false),
-      peg$c17 = function(chars) { return {type:"Identifier", name: chars.join("")}},
-      peg$c18 = /^[0-9]/,
-      peg$c19 = peg$classExpectation([["0", "9"]], false, false),
-      peg$c20 = ".",
-      peg$c21 = peg$literalExpectation(".", false),
-      peg$c22 = function(digits) { 
-            return literal(Number(digits.flat().join("")))
-          },
-      peg$c23 = "-",
-      peg$c24 = peg$literalExpectation("-", false),
-      peg$c25 = function(sign, digits) { 
-            return sign ? negativeLiteral(Number(digits.join(""))) : literal(Number(digits.join("")));
-          },
-      peg$c26 = "\"",
-      peg$c27 = peg$literalExpectation("\"", false),
-      peg$c28 = /^[A-Za-z0-9_ ]/,
-      peg$c29 = peg$classExpectation([["A", "Z"], ["a", "z"], ["0", "9"], "_", " "], false, false),
-      peg$c30 = function(chars) { 
-          return literal(chars.join(""));
-         },
-      peg$c31 = "START",
-      peg$c32 = peg$literalExpectation("START", false),
-      peg$c33 = "PRINT",
-      peg$c34 = peg$literalExpectation("PRINT", false),
-      peg$c35 = "(",
-      peg$c36 = peg$literalExpectation("(", false),
-      peg$c37 = ")",
-      peg$c38 = peg$literalExpectation(")", false),
-      peg$c39 = ",",
-      peg$c40 = peg$literalExpectation(",", false),
-      peg$c41 = "<-",
-      peg$c42 = peg$literalExpectation("<-", false),
-      peg$c43 = "FUNCTION",
-      peg$c44 = peg$literalExpectation("FUNCTION", false),
-      peg$c45 = "->",
-      peg$c46 = peg$literalExpectation("->", false),
-      peg$c47 = ":",
-      peg$c48 = peg$literalExpectation(":", false),
-      peg$c49 = "=",
-      peg$c50 = peg$literalExpectation("=", false),
-      peg$c51 = "BOOLEAN",
-      peg$c52 = peg$literalExpectation("BOOLEAN", false),
-      peg$c53 = function() { return (typeHandler.registerTypeUsage("Boolean"), typeHandler.getGuardFactory("Boolean")) },
-      peg$c54 = "STRING",
-      peg$c55 = peg$literalExpectation("STRING", false),
-      peg$c56 = function() { return (typeHandler.registerTypeUsage("String"), typeHandler.getGuardFactory("String")) },
-      peg$c57 = "CALLABLE",
-      peg$c58 = peg$literalExpectation("CALLABLE", false),
-      peg$c59 = function() { return (typeHandler.registerTypeUsage("Function"), typeHandler.getGuardFactory("Function")) },
-      peg$c60 = "\uD83E\uDD37",
-      peg$c61 = peg$literalExpectation("\uD83E\uDD37", false),
-      peg$c62 = function() { return (typeHandler.registerTypeUsage("Any"), typeHandler.getGuardFactory("Any")) },
-      peg$c63 = "[",
-      peg$c64 = peg$literalExpectation("[", false),
-      peg$c65 = "..",
-      peg$c66 = peg$literalExpectation("..", false),
-      peg$c67 = "]",
-      peg$c68 = peg$literalExpectation("]", false),
-      peg$c69 = function(from, to) { return (typeHandler.registerTypeUsage("NumberClosedInterval"), typeHandler.getGuardFactory("NumberClosedInterval", from[0], to[0])); },
-      peg$c70 = function(from, to) { return (typeHandler.registerTypeUsage("NumberOpenInterval"), typeHandler.getGuardFactory("NumberOpenInterval", from[0], to[0])); },
-      peg$c71 = "<",
-      peg$c72 = peg$literalExpectation("<", false),
-      peg$c73 = ">",
-      peg$c74 = peg$literalExpectation(">", false),
-      peg$c75 = function(value) { return (typeHandler.registerTypeUsage("ExactNumber"), typeHandler.getGuardFactory("ExactNumber", value[0])); },
-      peg$c76 = "NUMBER",
-      peg$c77 = peg$literalExpectation("NUMBER", false),
-      peg$c78 = function() { return (typeHandler.registerTypeUsage("Number"), typeHandler.getGuardFactory("Number")) },
-      peg$c79 = "FALSE",
-      peg$c80 = peg$literalExpectation("FALSE", false),
-      peg$c81 = "TRUE",
-      peg$c82 = peg$literalExpectation("TRUE", false),
-      peg$c83 = "AND",
-      peg$c84 = peg$literalExpectation("AND", false),
-      peg$c85 = "OR",
-      peg$c86 = peg$literalExpectation("OR", false),
-      peg$c87 = "NOT",
-      peg$c88 = peg$literalExpectation("NOT", false),
-      peg$c89 = "EQUALS",
-      peg$c90 = peg$literalExpectation("EQUALS", false),
-      peg$c91 = "IDENTICAL",
-      peg$c92 = peg$literalExpectation("IDENTICAL", false),
-      peg$c93 = ">=",
-      peg$c94 = peg$literalExpectation(">=", false),
-      peg$c95 = "<=",
-      peg$c96 = peg$literalExpectation("<=", false),
-      peg$c97 = "+",
-      peg$c98 = peg$literalExpectation("+", false),
-      peg$c99 = "*",
-      peg$c100 = peg$literalExpectation("*", false),
-      peg$c101 = "^",
-      peg$c102 = peg$literalExpectation("^", false),
-      peg$c103 = "/",
-      peg$c104 = peg$literalExpectation("/", false),
-      peg$c105 = "CONCAT",
-      peg$c106 = peg$literalExpectation("CONCAT", false),
-      peg$c107 = "VARIABLE",
-      peg$c108 = peg$literalExpectation("VARIABLE", false),
-      peg$c109 = function(body) {
-            const over = overload({
-              type: "Program",
-              body: optionalList(body)
-            })
-            return {type: "Program",
-              body: [...typeHandler.getGuards(), ...over.body]
-            }
-          },
-      peg$c110 = function(head, tail) {
-            return buildList(head, tail, 1);
-          },
-      peg$c111 = /^[ \t\n\r]/,
-      peg$c112 = peg$classExpectation([" ", "\t", "\n", "\r"], false, false),
-
-      peg$currPos          = 0,
-      peg$savedPos         = 0,
-      peg$posDetailsCache  = [{ line: 1, column: 1 }],
-      peg$maxFailPos       = 0,
-      peg$maxFailExpected  = [],
-      peg$silentFails      = 0,
-
-      peg$result;
+    peg$startRuleFunctions = { Start: peg$parseStart },
+    peg$startRuleFunction = peg$parseStart,
+    peg$c0 = function (program) {
+      return program;
+    },
+    peg$c1 = function (val1, val2) {
+      return binaryExp("+", val1, val2);
+    },
+    peg$c2 = function (exp) {
+      return exp;
+    },
+    peg$c3 = function (val1, val2) {
+      return binaryExp("-", val1, val2);
+    },
+    peg$c4 = function (val1, val2) {
+      return binaryExp("*", val1, val2);
+    },
+    peg$c5 = function (val1, val2) {
+      return binaryExp("/", val1, val2);
+    },
+    peg$c6 = function (val1, val2) {
+      return binaryExp("**", val1, val2);
+    },
+    peg$c7 = function (ident, statement) {
+      return varDeclaration(ident, statement);
+    },
+    peg$c8 = function (ident, statement) {
+      return varAssignment(ident, statement);
+    },
+    peg$c9 = function (type1, type2, func, par, res) {
+      const types = [type1, ...type2.map((array) => array[3])];
+      return funDeclaration(func, par, res, types);
+    },
+    peg$c10 = function (func, par1, par2) {
+      const pars = [par1, ...par2.map((array) => array[3])];
+      return funcCall(func, ...pars);
+    },
+    peg$c11 = function (ops, ret) {
+      return [ops, ret];
+    },
+    peg$c12 = function (ret) {
+      return [[], ret];
+    },
+    peg$c13 = function (ops) {
+      return retStatement(ops);
+    },
+    peg$c14 = function (exp) {
+      return print(exp);
+    },
+    peg$c15 = function (exp) {
+      return { type: "Start", exp };
+    },
+    peg$c16 = /^[a-z0-9_]/,
+    peg$c17 = peg$classExpectation([["a", "z"], ["0", "9"], "_"], false, false),
+    peg$c18 = function (chars) {
+      return { type: "Identifier", name: chars.join("") };
+    },
+    peg$c19 = /^[0-9]/,
+    peg$c20 = peg$classExpectation([["0", "9"]], false, false),
+    peg$c21 = ".",
+    peg$c22 = peg$literalExpectation(".", false),
+    peg$c23 = function (digits) {
+      return literal(Number(digits.flat().join("")));
+    },
+    peg$c24 = "-",
+    peg$c25 = peg$literalExpectation("-", false),
+    peg$c26 = function (sign, digits) {
+      return sign
+        ? negativeLiteral(Number(digits.join("")))
+        : literal(Number(digits.join("")));
+    },
+    peg$c27 = '"',
+    peg$c28 = peg$literalExpectation('"', false),
+    peg$c29 = /^[A-Za-z0-9_ ]/,
+    peg$c30 = peg$classExpectation(
+      [["A", "Z"], ["a", "z"], ["0", "9"], "_", " "],
+      false,
+      false
+    ),
+    peg$c31 = function (chars) {
+      return literal(chars.join(""));
+    },
+    peg$c32 = "START",
+    peg$c33 = peg$literalExpectation("START", false),
+    peg$c34 = "PRINT",
+    peg$c35 = peg$literalExpectation("PRINT", false),
+    peg$c36 = "(",
+    peg$c37 = peg$literalExpectation("(", false),
+    peg$c38 = ")",
+    peg$c39 = peg$literalExpectation(")", false),
+    peg$c40 = ",",
+    peg$c41 = peg$literalExpectation(",", false),
+    peg$c42 = "<-",
+    peg$c43 = peg$literalExpectation("<-", false),
+    peg$c44 = "FUNCTION",
+    peg$c45 = peg$literalExpectation("FUNCTION", false),
+    peg$c46 = "->",
+    peg$c47 = peg$literalExpectation("->", false),
+    peg$c48 = ":",
+    peg$c49 = peg$literalExpectation(":", false),
+    peg$c50 = "=",
+    peg$c51 = peg$literalExpectation("=", false),
+    peg$c52 = "BOOLEAN",
+    peg$c53 = peg$literalExpectation("BOOLEAN", false),
+    peg$c54 = function () {
+      return (
+        typeHandler.registerTypeUsage("Boolean"),
+        typeHandler.getGuardFactory("Boolean")
+      );
+    },
+    peg$c55 = "STRING",
+    peg$c56 = peg$literalExpectation("STRING", false),
+    peg$c57 = function () {
+      return (
+        typeHandler.registerTypeUsage("String"),
+        typeHandler.getGuardFactory("String")
+      );
+    },
+    peg$c58 = "CALLABLE",
+    peg$c59 = peg$literalExpectation("CALLABLE", false),
+    peg$c60 = function () {
+      return (
+        typeHandler.registerTypeUsage("Function"),
+        typeHandler.getGuardFactory("Function")
+      );
+    },
+    peg$c61 = "\uD83E\uDD37",
+    peg$c62 = peg$literalExpectation("\uD83E\uDD37", false),
+    peg$c63 = function () {
+      return (
+        typeHandler.registerTypeUsage("Any"), typeHandler.getGuardFactory("Any")
+      );
+    },
+    peg$c64 = "[",
+    peg$c65 = peg$literalExpectation("[", false),
+    peg$c66 = "..",
+    peg$c67 = peg$literalExpectation("..", false),
+    peg$c68 = "]",
+    peg$c69 = peg$literalExpectation("]", false),
+    peg$c70 = function (from, to) {
+      return (
+        typeHandler.registerTypeUsage("NumberClosedInterval"),
+        typeHandler.getGuardFactory("NumberClosedInterval", from[0], to[0])
+      );
+    },
+    peg$c71 = function (from, to) {
+      return (
+        typeHandler.registerTypeUsage("NumberOpenInterval"),
+        typeHandler.getGuardFactory("NumberOpenInterval", from[0], to[0])
+      );
+    },
+    peg$c72 = "<",
+    peg$c73 = peg$literalExpectation("<", false),
+    peg$c74 = ">",
+    peg$c75 = peg$literalExpectation(">", false),
+    peg$c76 = function (value) {
+      return (
+        typeHandler.registerTypeUsage("ExactNumber"),
+        typeHandler.getGuardFactory("ExactNumber", value[0])
+      );
+    },
+    peg$c77 = "NUMBER",
+    peg$c78 = peg$literalExpectation("NUMBER", false),
+    peg$c79 = function () {
+      return (
+        typeHandler.registerTypeUsage("Number"),
+        typeHandler.getGuardFactory("Number")
+      );
+    },
+    peg$c80 = "FALSE",
+    peg$c81 = peg$literalExpectation("FALSE", false),
+    peg$c82 = "TRUE",
+    peg$c83 = peg$literalExpectation("TRUE", false),
+    peg$c84 = "AND",
+    peg$c85 = peg$literalExpectation("AND", false),
+    peg$c86 = "OR",
+    peg$c87 = peg$literalExpectation("OR", false),
+    peg$c88 = "NOT",
+    peg$c89 = peg$literalExpectation("NOT", false),
+    peg$c90 = "EQUALS",
+    peg$c91 = peg$literalExpectation("EQUALS", false),
+    peg$c92 = "IDENTICAL",
+    peg$c93 = peg$literalExpectation("IDENTICAL", false),
+    peg$c94 = ">=",
+    peg$c95 = peg$literalExpectation(">=", false),
+    peg$c96 = "<=",
+    peg$c97 = peg$literalExpectation("<=", false),
+    peg$c98 = "+",
+    peg$c99 = peg$literalExpectation("+", false),
+    peg$c100 = "*",
+    peg$c101 = peg$literalExpectation("*", false),
+    peg$c102 = "^",
+    peg$c103 = peg$literalExpectation("^", false),
+    peg$c104 = "/",
+    peg$c105 = peg$literalExpectation("/", false),
+    peg$c106 = "CONCAT",
+    peg$c107 = peg$literalExpectation("CONCAT", false),
+    peg$c108 = "VARIABLE",
+    peg$c109 = peg$literalExpectation("VARIABLE", false),
+    peg$c110 = function (body) {
+      const over = overload({
+        type: "Program",
+        body: optionalList(body),
+      });
+      return {
+        type: "Program",
+        body: [...typeHandler.getGuards(), ...over.body],
+      };
+    },
+    peg$c111 = function (head, tail) {
+      return buildList(head, tail, 1);
+    },
+    peg$c112 = /^[ \t\n\r]/,
+    peg$c113 = peg$classExpectation([" ", "\t", "\n", "\r"], false, false),
+    peg$currPos = 0,
+    peg$savedPos = 0,
+    peg$posDetailsCache = [{ line: 1, column: 1 }],
+    peg$maxFailPos = 0,
+    peg$maxFailExpected = [],
+    peg$silentFails = 0,
+    peg$result;
 
   if ("startRule" in options) {
     if (!(options.startRule in peg$startRuleFunctions)) {
-      throw new Error("Can't start parsing from rule \"" + options.startRule + "\".");
+      throw new Error(
+        "Can't start parsing from rule \"" + options.startRule + '".'
+      );
     }
 
     peg$startRuleFunction = peg$startRuleFunctions[options.startRule];
@@ -328,7 +400,10 @@ function peg$parse(input, options) {
   }
 
   function expected(description, location) {
-    location = location !== void 0 ? location : peg$computeLocation(peg$savedPos, peg$currPos)
+    location =
+      location !== void 0
+        ? location
+        : peg$computeLocation(peg$savedPos, peg$currPos);
 
     throw peg$buildStructuredError(
       [peg$otherExpectation(description)],
@@ -338,7 +413,10 @@ function peg$parse(input, options) {
   }
 
   function error(message, location) {
-    location = location !== void 0 ? location : peg$computeLocation(peg$savedPos, peg$currPos)
+    location =
+      location !== void 0
+        ? location
+        : peg$computeLocation(peg$savedPos, peg$currPos);
 
     throw peg$buildSimpleError(message, location);
   }
@@ -348,7 +426,12 @@ function peg$parse(input, options) {
   }
 
   function peg$classExpectation(parts, inverted, ignoreCase) {
-    return { type: "class", parts: parts, inverted: inverted, ignoreCase: ignoreCase };
+    return {
+      type: "class",
+      parts: parts,
+      inverted: inverted,
+      ignoreCase: ignoreCase,
+    };
   }
 
   function peg$anyExpectation() {
@@ -364,7 +447,8 @@ function peg$parse(input, options) {
   }
 
   function peg$computePosDetails(pos) {
-    var details = peg$posDetailsCache[pos], p;
+    var details = peg$posDetailsCache[pos],
+      p;
 
     if (details) {
       return details;
@@ -376,8 +460,8 @@ function peg$parse(input, options) {
 
       details = peg$posDetailsCache[p];
       details = {
-        line:   details.line,
-        column: details.column
+        line: details.line,
+        column: details.column,
       };
 
       while (p < pos) {
@@ -398,24 +482,26 @@ function peg$parse(input, options) {
 
   function peg$computeLocation(startPos, endPos) {
     var startPosDetails = peg$computePosDetails(startPos),
-        endPosDetails   = peg$computePosDetails(endPos);
+      endPosDetails = peg$computePosDetails(endPos);
 
     return {
       start: {
         offset: startPos,
-        line:   startPosDetails.line,
-        column: startPosDetails.column
+        line: startPosDetails.line,
+        column: startPosDetails.column,
       },
       end: {
         offset: endPos,
-        line:   endPosDetails.line,
-        column: endPosDetails.column
-      }
+        line: endPosDetails.line,
+        column: endPosDetails.column,
+      },
     };
   }
 
   function peg$fail(expected) {
-    if (peg$currPos < peg$maxFailPos) { return; }
+    if (peg$currPos < peg$maxFailPos) {
+      return;
+    }
 
     if (peg$currPos > peg$maxFailPos) {
       peg$maxFailPos = peg$currPos;
@@ -474,14 +560,11 @@ function peg$parse(input, options) {
     if (s0 === peg$FAILED) {
       s0 = peg$parseSubStatement();
       if (s0 === peg$FAILED) {
-        s0 = peg$parseMulStatement();
+        s0 = peg$parseFactorExp();
         if (s0 === peg$FAILED) {
-          s0 = peg$parseDivStatement();
+          s0 = peg$parsePowStatement();
           if (s0 === peg$FAILED) {
-            s0 = peg$parsePowStatement();
-            if (s0 === peg$FAILED) {
-              s0 = peg$parseSingleLiteral();
-            }
+            s0 = peg$parseSingleLiteral();
           }
         }
       }
@@ -630,11 +713,85 @@ function peg$parse(input, options) {
     return s0;
   }
 
+  function peg$parseAddSubExp() {
+    var s0;
+
+    s0 = peg$parseAddStatement();
+    if (s0 === peg$FAILED) {
+      s0 = peg$parseSubStatement();
+    }
+
+    return s0;
+  }
+
+  function peg$parseMulDivExp() {
+    var s0;
+
+    s0 = peg$parseMulStatement();
+    if (s0 === peg$FAILED) {
+      s0 = peg$parseDivStatement();
+      if (s0 === peg$FAILED) {
+        s0 = peg$parseFactorExp();
+      }
+    }
+
+    return s0;
+  }
+
+  function peg$parseFactorExp() {
+    var s0;
+
+    s0 = peg$parseIdentifier();
+    if (s0 === peg$FAILED) {
+      s0 = peg$parseNumberLiteral();
+      if (s0 === peg$FAILED) {
+        s0 = peg$parseExpressionBrackets();
+      }
+    }
+
+    return s0;
+  }
+
+  function peg$parseExpressionBrackets() {
+    var s0, s1, s2, s3, s4;
+
+    s0 = peg$currPos;
+    s1 = peg$parseLeftBrace();
+    if (s1 !== peg$FAILED) {
+      s2 = peg$parseArithmeticsStatements();
+      if (s2 !== peg$FAILED) {
+        s3 = peg$parseRightBrace();
+        if (s3 !== peg$FAILED) {
+          s4 = peg$parse_();
+          if (s4 !== peg$FAILED) {
+            peg$savedPos = s0;
+            s1 = peg$c2(s2);
+            s0 = s1;
+          } else {
+            peg$currPos = s0;
+            s0 = peg$FAILED;
+          }
+        } else {
+          peg$currPos = s0;
+          s0 = peg$FAILED;
+        }
+      } else {
+        peg$currPos = s0;
+        s0 = peg$FAILED;
+      }
+    } else {
+      peg$currPos = s0;
+      s0 = peg$FAILED;
+    }
+
+    return s0;
+  }
+
   function peg$parseAddStatement() {
     var s0, s1, s2, s3, s4, s5, s6;
 
     s0 = peg$currPos;
-    s1 = peg$parseNumericLiteral();
+    s1 = peg$parseMulDivExp();
     if (s1 !== peg$FAILED) {
       s2 = peg$parse_();
       if (s2 !== peg$FAILED) {
@@ -642,7 +799,7 @@ function peg$parse(input, options) {
         if (s3 !== peg$FAILED) {
           s4 = peg$parse_();
           if (s4 !== peg$FAILED) {
-            s5 = peg$parseArithmeticsStatements();
+            s5 = peg$parseAddSubExp();
             if (s5 !== peg$FAILED) {
               s6 = peg$parse_();
               if (s6 !== peg$FAILED) {
@@ -673,6 +830,48 @@ function peg$parse(input, options) {
       peg$currPos = s0;
       s0 = peg$FAILED;
     }
+    if (s0 === peg$FAILED) {
+      s0 = peg$currPos;
+      s1 = peg$parseMulDivExp();
+      if (s1 !== peg$FAILED) {
+        s2 = peg$parse_();
+        if (s2 !== peg$FAILED) {
+          s3 = peg$parsePlus();
+          if (s3 !== peg$FAILED) {
+            s4 = peg$parse_();
+            if (s4 !== peg$FAILED) {
+              s5 = peg$parseMulDivExp();
+              if (s5 !== peg$FAILED) {
+                s6 = peg$parse_();
+                if (s6 !== peg$FAILED) {
+                  peg$savedPos = s0;
+                  s1 = peg$c1(s1, s5);
+                  s0 = s1;
+                } else {
+                  peg$currPos = s0;
+                  s0 = peg$FAILED;
+                }
+              } else {
+                peg$currPos = s0;
+                s0 = peg$FAILED;
+              }
+            } else {
+              peg$currPos = s0;
+              s0 = peg$FAILED;
+            }
+          } else {
+            peg$currPos = s0;
+            s0 = peg$FAILED;
+          }
+        } else {
+          peg$currPos = s0;
+          s0 = peg$FAILED;
+        }
+      } else {
+        peg$currPos = s0;
+        s0 = peg$FAILED;
+      }
+    }
 
     return s0;
   }
@@ -681,7 +880,7 @@ function peg$parse(input, options) {
     var s0, s1, s2, s3, s4, s5, s6;
 
     s0 = peg$currPos;
-    s1 = peg$parseNumericLiteral();
+    s1 = peg$parseMulDivExp();
     if (s1 !== peg$FAILED) {
       s2 = peg$parse_();
       if (s2 !== peg$FAILED) {
@@ -689,12 +888,12 @@ function peg$parse(input, options) {
         if (s3 !== peg$FAILED) {
           s4 = peg$parse_();
           if (s4 !== peg$FAILED) {
-            s5 = peg$parseArithmeticsStatements();
+            s5 = peg$parseAddSubExp();
             if (s5 !== peg$FAILED) {
               s6 = peg$parse_();
               if (s6 !== peg$FAILED) {
                 peg$savedPos = s0;
-                s1 = peg$c2(s1, s5);
+                s1 = peg$c3(s1, s5);
                 s0 = s1;
               } else {
                 peg$currPos = s0;
@@ -720,6 +919,48 @@ function peg$parse(input, options) {
       peg$currPos = s0;
       s0 = peg$FAILED;
     }
+    if (s0 === peg$FAILED) {
+      s0 = peg$currPos;
+      s1 = peg$parseMulDivExp();
+      if (s1 !== peg$FAILED) {
+        s2 = peg$parse_();
+        if (s2 !== peg$FAILED) {
+          s3 = peg$parseMinus();
+          if (s3 !== peg$FAILED) {
+            s4 = peg$parse_();
+            if (s4 !== peg$FAILED) {
+              s5 = peg$parseMulDivExp();
+              if (s5 !== peg$FAILED) {
+                s6 = peg$parse_();
+                if (s6 !== peg$FAILED) {
+                  peg$savedPos = s0;
+                  s1 = peg$c3(s1, s5);
+                  s0 = s1;
+                } else {
+                  peg$currPos = s0;
+                  s0 = peg$FAILED;
+                }
+              } else {
+                peg$currPos = s0;
+                s0 = peg$FAILED;
+              }
+            } else {
+              peg$currPos = s0;
+              s0 = peg$FAILED;
+            }
+          } else {
+            peg$currPos = s0;
+            s0 = peg$FAILED;
+          }
+        } else {
+          peg$currPos = s0;
+          s0 = peg$FAILED;
+        }
+      } else {
+        peg$currPos = s0;
+        s0 = peg$FAILED;
+      }
+    }
 
     return s0;
   }
@@ -728,7 +969,7 @@ function peg$parse(input, options) {
     var s0, s1, s2, s3, s4, s5, s6;
 
     s0 = peg$currPos;
-    s1 = peg$parseNumericLiteral();
+    s1 = peg$parseFactorExp();
     if (s1 !== peg$FAILED) {
       s2 = peg$parse_();
       if (s2 !== peg$FAILED) {
@@ -736,12 +977,12 @@ function peg$parse(input, options) {
         if (s3 !== peg$FAILED) {
           s4 = peg$parse_();
           if (s4 !== peg$FAILED) {
-            s5 = peg$parseArithmeticsStatements();
+            s5 = peg$parseMulDivExp();
             if (s5 !== peg$FAILED) {
               s6 = peg$parse_();
               if (s6 !== peg$FAILED) {
                 peg$savedPos = s0;
-                s1 = peg$c3(s1, s5);
+                s1 = peg$c4(s1, s5);
                 s0 = s1;
               } else {
                 peg$currPos = s0;
@@ -775,7 +1016,7 @@ function peg$parse(input, options) {
     var s0, s1, s2, s3, s4, s5, s6;
 
     s0 = peg$currPos;
-    s1 = peg$parseNumericLiteral();
+    s1 = peg$parseFactorExp();
     if (s1 !== peg$FAILED) {
       s2 = peg$parse_();
       if (s2 !== peg$FAILED) {
@@ -783,12 +1024,12 @@ function peg$parse(input, options) {
         if (s3 !== peg$FAILED) {
           s4 = peg$parse_();
           if (s4 !== peg$FAILED) {
-            s5 = peg$parseArithmeticsStatements();
+            s5 = peg$parseMulDivExp();
             if (s5 !== peg$FAILED) {
               s6 = peg$parse_();
               if (s6 !== peg$FAILED) {
                 peg$savedPos = s0;
-                s1 = peg$c4(s1, s5);
+                s1 = peg$c5(s1, s5);
                 s0 = s1;
               } else {
                 peg$currPos = s0;
@@ -835,7 +1076,7 @@ function peg$parse(input, options) {
               s6 = peg$parse_();
               if (s6 !== peg$FAILED) {
                 peg$savedPos = s0;
-                s1 = peg$c5(s1, s5);
+                s1 = peg$c6(s1, s5);
                 s0 = s1;
               } else {
                 peg$currPos = s0;
@@ -888,7 +1129,7 @@ function peg$parse(input, options) {
                     s9 = peg$parse_();
                     if (s9 !== peg$FAILED) {
                       peg$savedPos = s0;
-                      s1 = peg$c6(s4, s8);
+                      s1 = peg$c7(s4, s8);
                       s0 = s1;
                     } else {
                       peg$currPos = s0;
@@ -947,7 +1188,7 @@ function peg$parse(input, options) {
               s6 = peg$parseExpression();
               if (s6 !== peg$FAILED) {
                 peg$savedPos = s0;
-                s1 = peg$c7(s2, s6);
+                s1 = peg$c8(s2, s6);
                 s0 = s1;
               } else {
                 peg$currPos = s0;
@@ -978,7 +1219,25 @@ function peg$parse(input, options) {
   }
 
   function peg$parseFunctionStatement() {
-    var s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11, s12, s13, s14, s15, s16, s17, s18;
+    var s0,
+      s1,
+      s2,
+      s3,
+      s4,
+      s5,
+      s6,
+      s7,
+      s8,
+      s9,
+      s10,
+      s11,
+      s12,
+      s13,
+      s14,
+      s15,
+      s16,
+      s17,
+      s18;
 
     s0 = peg$currPos;
     s1 = peg$parseFunctionKeyWord();
@@ -1133,7 +1392,7 @@ function peg$parse(input, options) {
                                       s18 = peg$parseFunctionBody();
                                       if (s18 !== peg$FAILED) {
                                         peg$savedPos = s0;
-                                        s1 = peg$c8(s4, s5, s11, s13, s18);
+                                        s1 = peg$c9(s4, s5, s11, s13, s18);
                                         s0 = s1;
                                       } else {
                                         peg$currPos = s0;
@@ -1288,7 +1547,7 @@ function peg$parse(input, options) {
               s6 = peg$parseRightBrace();
               if (s6 !== peg$FAILED) {
                 peg$savedPos = s0;
-                s1 = peg$c9(s2, s4, s5);
+                s1 = peg$c10(s2, s4, s5);
                 s0 = s1;
               } else {
                 peg$currPos = s0;
@@ -1336,7 +1595,7 @@ function peg$parse(input, options) {
           s4 = peg$parseReturnStatement();
           if (s4 !== peg$FAILED) {
             peg$savedPos = s0;
-            s1 = peg$c10(s2, s4);
+            s1 = peg$c11(s2, s4);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -1359,7 +1618,7 @@ function peg$parse(input, options) {
       s1 = peg$parseReturnStatement();
       if (s1 !== peg$FAILED) {
         peg$savedPos = s0;
-        s1 = peg$c11(s1);
+        s1 = peg$c12(s1);
       }
       s0 = s1;
     }
@@ -1382,7 +1641,7 @@ function peg$parse(input, options) {
             s5 = peg$parse_();
             if (s5 !== peg$FAILED) {
               peg$savedPos = s0;
-              s1 = peg$c12(s4);
+              s1 = peg$c13(s4);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -1421,7 +1680,7 @@ function peg$parse(input, options) {
           s4 = peg$parseExpression();
           if (s4 !== peg$FAILED) {
             peg$savedPos = s0;
-            s1 = peg$c13(s4);
+            s1 = peg$c14(s4);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -1458,7 +1717,7 @@ function peg$parse(input, options) {
             s5 = peg$parse_();
             if (s5 !== peg$FAILED) {
               peg$savedPos = s0;
-              s1 = peg$c14(s4);
+              s1 = peg$c15(s4);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -1491,22 +1750,26 @@ function peg$parse(input, options) {
     s1 = peg$parse_();
     if (s1 !== peg$FAILED) {
       s2 = [];
-      if (peg$c15.test(input.charAt(peg$currPos))) {
+      if (peg$c16.test(input.charAt(peg$currPos))) {
         s3 = input.charAt(peg$currPos);
         peg$currPos++;
       } else {
         s3 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c16); }
+        if (peg$silentFails === 0) {
+          peg$fail(peg$c17);
+        }
       }
       if (s3 !== peg$FAILED) {
         while (s3 !== peg$FAILED) {
           s2.push(s3);
-          if (peg$c15.test(input.charAt(peg$currPos))) {
+          if (peg$c16.test(input.charAt(peg$currPos))) {
             s3 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c16); }
+            if (peg$silentFails === 0) {
+              peg$fail(peg$c17);
+            }
           }
         }
       } else {
@@ -1516,7 +1779,7 @@ function peg$parse(input, options) {
         s3 = peg$parse_();
         if (s3 !== peg$FAILED) {
           peg$savedPos = s0;
-          s1 = peg$c17(s2);
+          s1 = peg$c18(s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -1542,22 +1805,26 @@ function peg$parse(input, options) {
     if (s1 !== peg$FAILED) {
       s2 = peg$currPos;
       s3 = [];
-      if (peg$c18.test(input.charAt(peg$currPos))) {
+      if (peg$c19.test(input.charAt(peg$currPos))) {
         s4 = input.charAt(peg$currPos);
         peg$currPos++;
       } else {
         s4 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c19); }
+        if (peg$silentFails === 0) {
+          peg$fail(peg$c20);
+        }
       }
       if (s4 !== peg$FAILED) {
         while (s4 !== peg$FAILED) {
           s3.push(s4);
-          if (peg$c18.test(input.charAt(peg$currPos))) {
+          if (peg$c19.test(input.charAt(peg$currPos))) {
             s4 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s4 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c19); }
+            if (peg$silentFails === 0) {
+              peg$fail(peg$c20);
+            }
           }
         }
       } else {
@@ -1565,30 +1832,36 @@ function peg$parse(input, options) {
       }
       if (s3 !== peg$FAILED) {
         if (input.charCodeAt(peg$currPos) === 46) {
-          s4 = peg$c20;
+          s4 = peg$c21;
           peg$currPos++;
         } else {
           s4 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c21); }
+          if (peg$silentFails === 0) {
+            peg$fail(peg$c22);
+          }
         }
         if (s4 !== peg$FAILED) {
           s5 = [];
-          if (peg$c18.test(input.charAt(peg$currPos))) {
+          if (peg$c19.test(input.charAt(peg$currPos))) {
             s6 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s6 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c19); }
+            if (peg$silentFails === 0) {
+              peg$fail(peg$c20);
+            }
           }
           if (s6 !== peg$FAILED) {
             while (s6 !== peg$FAILED) {
               s5.push(s6);
-              if (peg$c18.test(input.charAt(peg$currPos))) {
+              if (peg$c19.test(input.charAt(peg$currPos))) {
                 s6 = input.charAt(peg$currPos);
                 peg$currPos++;
               } else {
                 s6 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c19); }
+                if (peg$silentFails === 0) {
+                  peg$fail(peg$c20);
+                }
               }
             }
           } else {
@@ -1613,7 +1886,7 @@ function peg$parse(input, options) {
         s3 = peg$parse_();
         if (s3 !== peg$FAILED) {
           peg$savedPos = s0;
-          s1 = peg$c22(s2);
+          s1 = peg$c23(s2);
           s0 = s1;
         } else {
           peg$currPos = s0;
@@ -1632,33 +1905,39 @@ function peg$parse(input, options) {
       s1 = peg$parse_();
       if (s1 !== peg$FAILED) {
         if (input.charCodeAt(peg$currPos) === 45) {
-          s2 = peg$c23;
+          s2 = peg$c24;
           peg$currPos++;
         } else {
           s2 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c24); }
+          if (peg$silentFails === 0) {
+            peg$fail(peg$c25);
+          }
         }
         if (s2 === peg$FAILED) {
           s2 = null;
         }
         if (s2 !== peg$FAILED) {
           s3 = [];
-          if (peg$c18.test(input.charAt(peg$currPos))) {
+          if (peg$c19.test(input.charAt(peg$currPos))) {
             s4 = input.charAt(peg$currPos);
             peg$currPos++;
           } else {
             s4 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c19); }
+            if (peg$silentFails === 0) {
+              peg$fail(peg$c20);
+            }
           }
           if (s4 !== peg$FAILED) {
             while (s4 !== peg$FAILED) {
               s3.push(s4);
-              if (peg$c18.test(input.charAt(peg$currPos))) {
+              if (peg$c19.test(input.charAt(peg$currPos))) {
                 s4 = input.charAt(peg$currPos);
                 peg$currPos++;
               } else {
                 s4 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c19); }
+                if (peg$silentFails === 0) {
+                  peg$fail(peg$c20);
+                }
               }
             }
           } else {
@@ -1668,7 +1947,7 @@ function peg$parse(input, options) {
             s4 = peg$parse_();
             if (s4 !== peg$FAILED) {
               peg$savedPos = s0;
-              s1 = peg$c25(s2, s3);
+              s1 = peg$c26(s2, s3);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -1698,30 +1977,36 @@ function peg$parse(input, options) {
     s1 = peg$parse_();
     if (s1 !== peg$FAILED) {
       if (input.charCodeAt(peg$currPos) === 34) {
-        s2 = peg$c26;
+        s2 = peg$c27;
         peg$currPos++;
       } else {
         s2 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c27); }
+        if (peg$silentFails === 0) {
+          peg$fail(peg$c28);
+        }
       }
       if (s2 !== peg$FAILED) {
         s3 = [];
-        if (peg$c28.test(input.charAt(peg$currPos))) {
+        if (peg$c29.test(input.charAt(peg$currPos))) {
           s4 = input.charAt(peg$currPos);
           peg$currPos++;
         } else {
           s4 = peg$FAILED;
-          if (peg$silentFails === 0) { peg$fail(peg$c29); }
+          if (peg$silentFails === 0) {
+            peg$fail(peg$c30);
+          }
         }
         if (s4 !== peg$FAILED) {
           while (s4 !== peg$FAILED) {
             s3.push(s4);
-            if (peg$c28.test(input.charAt(peg$currPos))) {
+            if (peg$c29.test(input.charAt(peg$currPos))) {
               s4 = input.charAt(peg$currPos);
               peg$currPos++;
             } else {
               s4 = peg$FAILED;
-              if (peg$silentFails === 0) { peg$fail(peg$c29); }
+              if (peg$silentFails === 0) {
+                peg$fail(peg$c30);
+              }
             }
           }
         } else {
@@ -1729,17 +2014,19 @@ function peg$parse(input, options) {
         }
         if (s3 !== peg$FAILED) {
           if (input.charCodeAt(peg$currPos) === 34) {
-            s4 = peg$c26;
+            s4 = peg$c27;
             peg$currPos++;
           } else {
             s4 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c27); }
+            if (peg$silentFails === 0) {
+              peg$fail(peg$c28);
+            }
           }
           if (s4 !== peg$FAILED) {
             s5 = peg$parse_();
             if (s5 !== peg$FAILED) {
               peg$savedPos = s0;
-              s1 = peg$c30(s3);
+              s1 = peg$c31(s3);
               s0 = s1;
             } else {
               peg$currPos = s0;
@@ -1768,12 +2055,14 @@ function peg$parse(input, options) {
   function peg$parseKeywordStart() {
     var s0;
 
-    if (input.substr(peg$currPos, 5) === peg$c31) {
-      s0 = peg$c31;
+    if (input.substr(peg$currPos, 5) === peg$c32) {
+      s0 = peg$c32;
       peg$currPos += 5;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c32); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c33);
+      }
     }
 
     return s0;
@@ -1782,12 +2071,14 @@ function peg$parse(input, options) {
   function peg$parsePrintToken() {
     var s0;
 
-    if (input.substr(peg$currPos, 5) === peg$c33) {
-      s0 = peg$c33;
+    if (input.substr(peg$currPos, 5) === peg$c34) {
+      s0 = peg$c34;
       peg$currPos += 5;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c34); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c35);
+      }
     }
 
     return s0;
@@ -1797,11 +2088,13 @@ function peg$parse(input, options) {
     var s0;
 
     if (input.charCodeAt(peg$currPos) === 40) {
-      s0 = peg$c35;
+      s0 = peg$c36;
       peg$currPos++;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c36); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c37);
+      }
     }
 
     return s0;
@@ -1811,11 +2104,13 @@ function peg$parse(input, options) {
     var s0;
 
     if (input.charCodeAt(peg$currPos) === 41) {
-      s0 = peg$c37;
+      s0 = peg$c38;
       peg$currPos++;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c38); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c39);
+      }
     }
 
     return s0;
@@ -1825,11 +2120,13 @@ function peg$parse(input, options) {
     var s0;
 
     if (input.charCodeAt(peg$currPos) === 44) {
-      s0 = peg$c39;
+      s0 = peg$c40;
       peg$currPos++;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c40); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c41);
+      }
     }
 
     return s0;
@@ -1838,12 +2135,14 @@ function peg$parse(input, options) {
   function peg$parseAssignment() {
     var s0;
 
-    if (input.substr(peg$currPos, 2) === peg$c41) {
-      s0 = peg$c41;
+    if (input.substr(peg$currPos, 2) === peg$c42) {
+      s0 = peg$c42;
       peg$currPos += 2;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c42); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c43);
+      }
     }
 
     return s0;
@@ -1852,12 +2151,14 @@ function peg$parse(input, options) {
   function peg$parseFunctionKeyWord() {
     var s0;
 
-    if (input.substr(peg$currPos, 8) === peg$c43) {
-      s0 = peg$c43;
+    if (input.substr(peg$currPos, 8) === peg$c44) {
+      s0 = peg$c44;
       peg$currPos += 8;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c44); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c45);
+      }
     }
 
     return s0;
@@ -1866,12 +2167,14 @@ function peg$parse(input, options) {
   function peg$parseFunctionResult() {
     var s0;
 
-    if (input.substr(peg$currPos, 2) === peg$c45) {
-      s0 = peg$c45;
+    if (input.substr(peg$currPos, 2) === peg$c46) {
+      s0 = peg$c46;
       peg$currPos += 2;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c46); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c47);
+      }
     }
 
     return s0;
@@ -1881,11 +2184,13 @@ function peg$parse(input, options) {
     var s0;
 
     if (input.charCodeAt(peg$currPos) === 58) {
-      s0 = peg$c47;
+      s0 = peg$c48;
       peg$currPos++;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c48); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c49);
+      }
     }
 
     return s0;
@@ -1895,11 +2200,13 @@ function peg$parse(input, options) {
     var s0;
 
     if (input.charCodeAt(peg$currPos) === 61) {
-      s0 = peg$c49;
+      s0 = peg$c50;
       peg$currPos++;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c50); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c51);
+      }
     }
 
     return s0;
@@ -1909,16 +2216,18 @@ function peg$parse(input, options) {
     var s0, s1;
 
     s0 = peg$currPos;
-    if (input.substr(peg$currPos, 7) === peg$c51) {
-      s1 = peg$c51;
+    if (input.substr(peg$currPos, 7) === peg$c52) {
+      s1 = peg$c52;
       peg$currPos += 7;
     } else {
       s1 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c52); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c53);
+      }
     }
     if (s1 !== peg$FAILED) {
       peg$savedPos = s0;
-      s1 = peg$c53();
+      s1 = peg$c54();
     }
     s0 = s1;
 
@@ -1929,16 +2238,18 @@ function peg$parse(input, options) {
     var s0, s1;
 
     s0 = peg$currPos;
-    if (input.substr(peg$currPos, 6) === peg$c54) {
-      s1 = peg$c54;
+    if (input.substr(peg$currPos, 6) === peg$c55) {
+      s1 = peg$c55;
       peg$currPos += 6;
     } else {
       s1 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c55); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c56);
+      }
     }
     if (s1 !== peg$FAILED) {
       peg$savedPos = s0;
-      s1 = peg$c56();
+      s1 = peg$c57();
     }
     s0 = s1;
 
@@ -1949,16 +2260,18 @@ function peg$parse(input, options) {
     var s0, s1;
 
     s0 = peg$currPos;
-    if (input.substr(peg$currPos, 8) === peg$c57) {
-      s1 = peg$c57;
+    if (input.substr(peg$currPos, 8) === peg$c58) {
+      s1 = peg$c58;
       peg$currPos += 8;
     } else {
       s1 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c58); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c59);
+      }
     }
     if (s1 !== peg$FAILED) {
       peg$savedPos = s0;
-      s1 = peg$c59();
+      s1 = peg$c60();
     }
     s0 = s1;
 
@@ -1969,16 +2282,18 @@ function peg$parse(input, options) {
     var s0, s1;
 
     s0 = peg$currPos;
-    if (input.substr(peg$currPos, 2) === peg$c60) {
-      s1 = peg$c60;
+    if (input.substr(peg$currPos, 2) === peg$c61) {
+      s1 = peg$c61;
       peg$currPos += 2;
     } else {
       s1 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c61); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c62);
+      }
     }
     if (s1 !== peg$FAILED) {
       peg$savedPos = s0;
-      s1 = peg$c62();
+      s1 = peg$c63();
     }
     s0 = s1;
 
@@ -2002,21 +2317,25 @@ function peg$parse(input, options) {
     if (s1 !== peg$FAILED) {
       s2 = [];
       if (input.charCodeAt(peg$currPos) === 91) {
-        s3 = peg$c63;
+        s3 = peg$c64;
         peg$currPos++;
       } else {
         s3 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c64); }
+        if (peg$silentFails === 0) {
+          peg$fail(peg$c65);
+        }
       }
       if (s3 !== peg$FAILED) {
         while (s3 !== peg$FAILED) {
           s2.push(s3);
           if (input.charCodeAt(peg$currPos) === 91) {
-            s3 = peg$c63;
+            s3 = peg$c64;
             peg$currPos++;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c64); }
+            if (peg$silentFails === 0) {
+              peg$fail(peg$c65);
+            }
           }
         }
       } else {
@@ -2035,22 +2354,26 @@ function peg$parse(input, options) {
         }
         if (s3 !== peg$FAILED) {
           s4 = [];
-          if (input.substr(peg$currPos, 2) === peg$c65) {
-            s5 = peg$c65;
+          if (input.substr(peg$currPos, 2) === peg$c66) {
+            s5 = peg$c66;
             peg$currPos += 2;
           } else {
             s5 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c66); }
+            if (peg$silentFails === 0) {
+              peg$fail(peg$c67);
+            }
           }
           if (s5 !== peg$FAILED) {
             while (s5 !== peg$FAILED) {
               s4.push(s5);
-              if (input.substr(peg$currPos, 2) === peg$c65) {
-                s5 = peg$c65;
+              if (input.substr(peg$currPos, 2) === peg$c66) {
+                s5 = peg$c66;
                 peg$currPos += 2;
               } else {
                 s5 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c66); }
+                if (peg$silentFails === 0) {
+                  peg$fail(peg$c67);
+                }
               }
             }
           } else {
@@ -2069,15 +2392,17 @@ function peg$parse(input, options) {
             }
             if (s5 !== peg$FAILED) {
               if (input.charCodeAt(peg$currPos) === 93) {
-                s6 = peg$c67;
+                s6 = peg$c68;
                 peg$currPos++;
               } else {
                 s6 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c68); }
+                if (peg$silentFails === 0) {
+                  peg$fail(peg$c69);
+                }
               }
               if (s6 !== peg$FAILED) {
                 peg$savedPos = s0;
-                s1 = peg$c69(s3, s5);
+                s1 = peg$c70(s3, s5);
                 s0 = s1;
               } else {
                 peg$currPos = s0;
@@ -2124,21 +2449,25 @@ function peg$parse(input, options) {
     if (s1 !== peg$FAILED) {
       s2 = [];
       if (input.charCodeAt(peg$currPos) === 40) {
-        s3 = peg$c35;
+        s3 = peg$c36;
         peg$currPos++;
       } else {
         s3 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c36); }
+        if (peg$silentFails === 0) {
+          peg$fail(peg$c37);
+        }
       }
       if (s3 !== peg$FAILED) {
         while (s3 !== peg$FAILED) {
           s2.push(s3);
           if (input.charCodeAt(peg$currPos) === 40) {
-            s3 = peg$c35;
+            s3 = peg$c36;
             peg$currPos++;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c36); }
+            if (peg$silentFails === 0) {
+              peg$fail(peg$c37);
+            }
           }
         }
       } else {
@@ -2157,22 +2486,26 @@ function peg$parse(input, options) {
         }
         if (s3 !== peg$FAILED) {
           s4 = [];
-          if (input.substr(peg$currPos, 2) === peg$c65) {
-            s5 = peg$c65;
+          if (input.substr(peg$currPos, 2) === peg$c66) {
+            s5 = peg$c66;
             peg$currPos += 2;
           } else {
             s5 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c66); }
+            if (peg$silentFails === 0) {
+              peg$fail(peg$c67);
+            }
           }
           if (s5 !== peg$FAILED) {
             while (s5 !== peg$FAILED) {
               s4.push(s5);
-              if (input.substr(peg$currPos, 2) === peg$c65) {
-                s5 = peg$c65;
+              if (input.substr(peg$currPos, 2) === peg$c66) {
+                s5 = peg$c66;
                 peg$currPos += 2;
               } else {
                 s5 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c66); }
+                if (peg$silentFails === 0) {
+                  peg$fail(peg$c67);
+                }
               }
             }
           } else {
@@ -2191,15 +2524,17 @@ function peg$parse(input, options) {
             }
             if (s5 !== peg$FAILED) {
               if (input.charCodeAt(peg$currPos) === 41) {
-                s6 = peg$c37;
+                s6 = peg$c38;
                 peg$currPos++;
               } else {
                 s6 = peg$FAILED;
-                if (peg$silentFails === 0) { peg$fail(peg$c38); }
+                if (peg$silentFails === 0) {
+                  peg$fail(peg$c39);
+                }
               }
               if (s6 !== peg$FAILED) {
                 peg$savedPos = s0;
-                s1 = peg$c70(s3, s5);
+                s1 = peg$c71(s3, s5);
                 s0 = s1;
               } else {
                 peg$currPos = s0;
@@ -2246,21 +2581,25 @@ function peg$parse(input, options) {
     if (s1 !== peg$FAILED) {
       s2 = [];
       if (input.charCodeAt(peg$currPos) === 60) {
-        s3 = peg$c71;
+        s3 = peg$c72;
         peg$currPos++;
       } else {
         s3 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c72); }
+        if (peg$silentFails === 0) {
+          peg$fail(peg$c73);
+        }
       }
       if (s3 !== peg$FAILED) {
         while (s3 !== peg$FAILED) {
           s2.push(s3);
           if (input.charCodeAt(peg$currPos) === 60) {
-            s3 = peg$c71;
+            s3 = peg$c72;
             peg$currPos++;
           } else {
             s3 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c72); }
+            if (peg$silentFails === 0) {
+              peg$fail(peg$c73);
+            }
           }
         }
       } else {
@@ -2279,15 +2618,17 @@ function peg$parse(input, options) {
         }
         if (s3 !== peg$FAILED) {
           if (input.charCodeAt(peg$currPos) === 62) {
-            s4 = peg$c73;
+            s4 = peg$c74;
             peg$currPos++;
           } else {
             s4 = peg$FAILED;
-            if (peg$silentFails === 0) { peg$fail(peg$c74); }
+            if (peg$silentFails === 0) {
+              peg$fail(peg$c75);
+            }
           }
           if (s4 !== peg$FAILED) {
             peg$savedPos = s0;
-            s1 = peg$c75(s3);
+            s1 = peg$c76(s3);
             s0 = s1;
           } else {
             peg$currPos = s0;
@@ -2313,16 +2654,18 @@ function peg$parse(input, options) {
     var s0, s1;
 
     s0 = peg$currPos;
-    if (input.substr(peg$currPos, 6) === peg$c76) {
-      s1 = peg$c76;
+    if (input.substr(peg$currPos, 6) === peg$c77) {
+      s1 = peg$c77;
       peg$currPos += 6;
     } else {
       s1 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c77); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c78);
+      }
     }
     if (s1 !== peg$FAILED) {
       peg$savedPos = s0;
-      s1 = peg$c78();
+      s1 = peg$c79();
     }
     s0 = s1;
 
@@ -2332,12 +2675,14 @@ function peg$parse(input, options) {
   function peg$parseFalse() {
     var s0;
 
-    if (input.substr(peg$currPos, 5) === peg$c79) {
-      s0 = peg$c79;
+    if (input.substr(peg$currPos, 5) === peg$c80) {
+      s0 = peg$c80;
       peg$currPos += 5;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c80); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c81);
+      }
     }
 
     return s0;
@@ -2346,12 +2691,14 @@ function peg$parse(input, options) {
   function peg$parseTrue() {
     var s0;
 
-    if (input.substr(peg$currPos, 4) === peg$c81) {
-      s0 = peg$c81;
+    if (input.substr(peg$currPos, 4) === peg$c82) {
+      s0 = peg$c82;
       peg$currPos += 4;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c82); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c83);
+      }
     }
 
     return s0;
@@ -2360,12 +2707,14 @@ function peg$parse(input, options) {
   function peg$parseAnd() {
     var s0;
 
-    if (input.substr(peg$currPos, 3) === peg$c83) {
-      s0 = peg$c83;
+    if (input.substr(peg$currPos, 3) === peg$c84) {
+      s0 = peg$c84;
       peg$currPos += 3;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c84); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c85);
+      }
     }
 
     return s0;
@@ -2374,12 +2723,14 @@ function peg$parse(input, options) {
   function peg$parseOr() {
     var s0;
 
-    if (input.substr(peg$currPos, 2) === peg$c85) {
-      s0 = peg$c85;
+    if (input.substr(peg$currPos, 2) === peg$c86) {
+      s0 = peg$c86;
       peg$currPos += 2;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c86); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c87);
+      }
     }
 
     return s0;
@@ -2388,12 +2739,14 @@ function peg$parse(input, options) {
   function peg$parseNot() {
     var s0;
 
-    if (input.substr(peg$currPos, 3) === peg$c87) {
-      s0 = peg$c87;
+    if (input.substr(peg$currPos, 3) === peg$c88) {
+      s0 = peg$c88;
       peg$currPos += 3;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c88); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c89);
+      }
     }
 
     return s0;
@@ -2402,12 +2755,14 @@ function peg$parse(input, options) {
   function peg$parseEqual() {
     var s0;
 
-    if (input.substr(peg$currPos, 6) === peg$c89) {
-      s0 = peg$c89;
+    if (input.substr(peg$currPos, 6) === peg$c90) {
+      s0 = peg$c90;
       peg$currPos += 6;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c90); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c91);
+      }
     }
 
     return s0;
@@ -2416,12 +2771,14 @@ function peg$parse(input, options) {
   function peg$parseIdentical() {
     var s0;
 
-    if (input.substr(peg$currPos, 9) === peg$c91) {
-      s0 = peg$c91;
+    if (input.substr(peg$currPos, 9) === peg$c92) {
+      s0 = peg$c92;
       peg$currPos += 9;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c92); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c93);
+      }
     }
 
     return s0;
@@ -2431,11 +2788,13 @@ function peg$parse(input, options) {
     var s0;
 
     if (input.charCodeAt(peg$currPos) === 62) {
-      s0 = peg$c73;
+      s0 = peg$c74;
       peg$currPos++;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c74); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c75);
+      }
     }
 
     return s0;
@@ -2444,12 +2803,14 @@ function peg$parse(input, options) {
   function peg$parseGreaterEqual() {
     var s0;
 
-    if (input.substr(peg$currPos, 2) === peg$c93) {
-      s0 = peg$c93;
+    if (input.substr(peg$currPos, 2) === peg$c94) {
+      s0 = peg$c94;
       peg$currPos += 2;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c94); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c95);
+      }
     }
 
     return s0;
@@ -2459,11 +2820,13 @@ function peg$parse(input, options) {
     var s0;
 
     if (input.charCodeAt(peg$currPos) === 60) {
-      s0 = peg$c71;
+      s0 = peg$c72;
       peg$currPos++;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c72); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c73);
+      }
     }
 
     return s0;
@@ -2472,12 +2835,14 @@ function peg$parse(input, options) {
   function peg$parseLessEqual() {
     var s0;
 
-    if (input.substr(peg$currPos, 2) === peg$c95) {
-      s0 = peg$c95;
+    if (input.substr(peg$currPos, 2) === peg$c96) {
+      s0 = peg$c96;
       peg$currPos += 2;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c96); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c97);
+      }
     }
 
     return s0;
@@ -2487,11 +2852,13 @@ function peg$parse(input, options) {
     var s0;
 
     if (input.charCodeAt(peg$currPos) === 43) {
-      s0 = peg$c97;
+      s0 = peg$c98;
       peg$currPos++;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c98); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c99);
+      }
     }
 
     return s0;
@@ -2501,11 +2868,13 @@ function peg$parse(input, options) {
     var s0;
 
     if (input.charCodeAt(peg$currPos) === 45) {
-      s0 = peg$c23;
+      s0 = peg$c24;
       peg$currPos++;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c24); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c25);
+      }
     }
 
     return s0;
@@ -2515,11 +2884,13 @@ function peg$parse(input, options) {
     var s0;
 
     if (input.charCodeAt(peg$currPos) === 42) {
-      s0 = peg$c99;
+      s0 = peg$c100;
       peg$currPos++;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c100); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c101);
+      }
     }
 
     return s0;
@@ -2529,11 +2900,13 @@ function peg$parse(input, options) {
     var s0;
 
     if (input.charCodeAt(peg$currPos) === 94) {
-      s0 = peg$c101;
+      s0 = peg$c102;
       peg$currPos++;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c102); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c103);
+      }
     }
 
     return s0;
@@ -2543,11 +2916,13 @@ function peg$parse(input, options) {
     var s0;
 
     if (input.charCodeAt(peg$currPos) === 47) {
-      s0 = peg$c103;
+      s0 = peg$c104;
       peg$currPos++;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c104); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c105);
+      }
     }
 
     return s0;
@@ -2556,12 +2931,14 @@ function peg$parse(input, options) {
   function peg$parseConcat() {
     var s0;
 
-    if (input.substr(peg$currPos, 6) === peg$c105) {
-      s0 = peg$c105;
+    if (input.substr(peg$currPos, 6) === peg$c106) {
+      s0 = peg$c106;
       peg$currPos += 6;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c106); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c107);
+      }
     }
 
     return s0;
@@ -2570,12 +2947,14 @@ function peg$parse(input, options) {
   function peg$parseVariable() {
     var s0;
 
-    if (input.substr(peg$currPos, 8) === peg$c107) {
-      s0 = peg$c107;
+    if (input.substr(peg$currPos, 8) === peg$c108) {
+      s0 = peg$c108;
       peg$currPos += 8;
     } else {
       s0 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c108); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c109);
+      }
     }
 
     return s0;
@@ -2591,7 +2970,7 @@ function peg$parse(input, options) {
     }
     if (s1 !== peg$FAILED) {
       peg$savedPos = s0;
-      s1 = peg$c109(s1);
+      s1 = peg$c110(s1);
     }
     s0 = s1;
 
@@ -2640,7 +3019,7 @@ function peg$parse(input, options) {
       }
       if (s2 !== peg$FAILED) {
         peg$savedPos = s0;
-        s1 = peg$c110(s1, s2);
+        s1 = peg$c111(s1, s2);
         s0 = s1;
       } else {
         peg$currPos = s0;
@@ -2669,529 +3048,603 @@ function peg$parse(input, options) {
     var s0, s1;
 
     s0 = [];
-    if (peg$c111.test(input.charAt(peg$currPos))) {
+    if (peg$c112.test(input.charAt(peg$currPos))) {
       s1 = input.charAt(peg$currPos);
       peg$currPos++;
     } else {
       s1 = peg$FAILED;
-      if (peg$silentFails === 0) { peg$fail(peg$c112); }
+      if (peg$silentFails === 0) {
+        peg$fail(peg$c113);
+      }
     }
     while (s1 !== peg$FAILED) {
       s0.push(s1);
-      if (peg$c111.test(input.charAt(peg$currPos))) {
+      if (peg$c112.test(input.charAt(peg$currPos))) {
         s1 = input.charAt(peg$currPos);
         peg$currPos++;
       } else {
         s1 = peg$FAILED;
-        if (peg$silentFails === 0) { peg$fail(peg$c112); }
+        if (peg$silentFails === 0) {
+          peg$fail(peg$c113);
+        }
       }
     }
 
     return s0;
   }
 
-
-    function errorGuardBody(type) {
-      return {
-          "type": "BlockStatement",
-          "body": [
-            {
-              "type": "IfStatement",
-              "test": {
-                "type": "BinaryExpression",
-                "operator": "===",
-                "left": {
-                  "type": "UnaryExpression",
-                  "operator": "typeof",
-                  "argument": {
-                    "type": "Identifier",
-                    "name": "x"
-                  },
-                  "prefix": true
+  function errorGuardBody(type) {
+    return {
+      type: "BlockStatement",
+      body: [
+        {
+          type: "IfStatement",
+          test: {
+            type: "BinaryExpression",
+            operator: "===",
+            left: {
+              type: "UnaryExpression",
+              operator: "typeof",
+              argument: {
+                type: "Identifier",
+                name: "x",
+              },
+              prefix: true,
+            },
+            right: {
+              type: "Literal",
+              value: type,
+            },
+          },
+          consequent: {
+            type: "BlockStatement",
+            body: [
+              {
+                type: "ReturnStatement",
+                argument: {
+                  type: "Literal",
+                  value: true,
+                  raw: "true",
                 },
-                "right": {
-                  "type": "Literal",
-                  "value": type
-                }
               },
-              "consequent": {
-                "type": "BlockStatement",
-                "body": [
-                  {
-                    "type": "ReturnStatement",
-                    "argument": {
-                      "type": "Literal",
-                      "value": true,
-                      "raw": "true"
-                    }
-                  }
-                ]
-              },
-              "alternate": {
-                "type": "BlockStatement",
-                "body": [
-                  {
-                    "type": "ExpressionStatement",
-                    "expression": throwStatement(
-                      {
-                        "type": "TemplateLiteral",
-                        "quasis": [
-                          {
-                            "type": "TemplateElement",
-                            "value": {
-                              "raw": `Expected parameter type: ${type}, but `,
-                            },
-                            "tail": false
-                          },
-                          {
-                            "type": "TemplateElement",
-                            "value": {
-                              "raw": " was given.",
-                              "cooked": " was given."
-                            },
-                            "tail": true
-                          }
-                        ],
-                        "expressions": [
-                          {
-                            "type": "UnaryExpression",
-                            "operator": "typeof",
-                            "argument": {
-                              "type": "Identifier",
-                              "name": "x"
-                            },
-                            "prefix": true
-                          }
-                        ]
-                      }
-                    )
-                  }
-                ]
-              }
-            }
-          ]
-        }
-    }
-
-    const typeHandler = (() => {
-       const booleanGuard = {
-         type: "FunctionDeclaration",
-         id: {
-           type: "Identifier",
-           name: "isBoolean",
-         },
-         params: [
-           {
-             type: "Identifier",
-             name: "x",
-           }
-         ],
-         body: errorGuardBody("boolean"),
-         generator: false,
-         expression: false,
-         async: false
-       };
-       const numberGuard = {
-         type: "FunctionDeclaration",
-         id: {
-           type: "Identifier",
-           name: "isNumber",
-         },
-         params: [
-           {
-             type: "Identifier",
-             name: "x",
-           }
-         ],
-         body: errorGuardBody("number"),
-         generator: false,
-         expression: false,
-         async: false
-       };
-       const numberExactGuard = {
-         type: "FunctionDeclaration",
-         id: {
-           type: "Identifier",
-           name: "isExactNumber",
-         },
-         params: [
-           {
-             type: "Identifier",
-             name: "x",
-           },
-           {
-             type: "Identifier",
-             name: "value",
-           },
-         ],
-         body: {
-           type: "BlockStatement",
-           body: [
-             {
-               type: "ReturnStatement",
-               argument: {
-                 type: "LogicalExpression",
-                 operator: "&&",
-                 left: {
-                   type: "BinaryExpression",
-                   operator: "===",
-                   left: {
-                     type: "UnaryExpression",
-                     operator: "typeof",
-                     argument: {
-                       type: "Identifier",
-                       name: "x",
-                     },
-                     prefix: true,
-                   },
-                   right: {
-                     type: "Literal",
-                     value: "number",
-                   }
-                 },
-                 right: {
-                   type: "BinaryExpression",
-                   operator: "===",
-                   left: {
-                     type: "Identifier",
-                     name: "x",
-                   },
-                   right: {
-                     type: "Identifier",
-                     name: "value",
-                   }
-                 }
-               }
-             } 
-           ],
-         },
-         generator: false,
-         expression: false,
-         async: false
-       };
-       const numberOpenIntervalGuard = {
-         type: "FunctionDeclaration",
-         id: {
-           type: "Identifier",
-           name: "isNumberOpenInterval",
-         },
-         params: [
-           {
-             type: "Identifier",
-             name: "x",
-           },
-           {
-             type: "Identifier",
-             name: "start",
-           },
-           {
-             type: "Identifier",
-             name: "stop",
-           }
-         ],
-         body: {
-           type: "BlockStatement",
-           body: [
-             {
-               type: "ReturnStatement",
-               argument: {
-                 type: "LogicalExpression",
-                 operator: "&&",
-                 left: {
-                   type: "BinaryExpression",
-                   operator: "===",
-                   left: {
-                     type: "UnaryExpression",
-                     operator: "typeof",
-                     argument: {
-                       type: "Identifier",
-                       name: "x",
-                     },
-                     prefix: true,
-                   },
-                   right: {
-                     type: "Literal",
-                     value: "number",
-                   }
-                 },
-                 right: {
-                   type: "LogicalExpression",
-                   operator: "&&",
-                   left: {
-                     type: "BinaryExpression",
-                     operator: ">",
-                     left: {
-                       type: "Identifier",
-                       name: "x",
-                     },
-                     right: {
-                       type: "Identifier",
-                       name: "start",
-                     }
-                   },
-                   right: {
-                     type: "BinaryExpression",
-                     operator: "<",
-                     left: {
-                       type: "Identifier",
-                       name: "x",
-                     },
-                     right: {
-                       type: "Identifier",
-                       name: "stop",
-                     }
-                   },
-                 }
-               }
-             }
-           ],
-         },
-         generator: false,
-         expression: false,
-         async: false
-       };
-       const numberClosedIntervalGuard = {
-         type: "FunctionDeclaration",
-         id: {
-           type: "Identifier",
-           name: "isNumberClosedInterval",
-         },
-         params: [
-           {
-             type: "Identifier",
-             name: "x",
-           },
-           {
-             type: "Identifier",
-             name: "start",
-           },
-           {
-             type: "Identifier",
-             name: "stop",
-           }
-         ],
-         body: {
-           type: "BlockStatement",
-           body: [
-             {
-               type: "ReturnStatement",
-               argument: {
-                 type: "LogicalExpression",
-                 operator: "&&",
-                 left: {
-                   type: "BinaryExpression",
-                   operator: "===",
-                   left: {
-                     type: "UnaryExpression",
-                     operator: "typeof",
-                     argument: {
-                       type: "Identifier",
-                       name: "x",
-                     },
-                     prefix: true,
-                   },
-                   right: {
-                     type: "Literal",
-                     value: "number",
-                   }
-                 },
-                 right: {
-                   type: "LogicalExpression",
-                   operator: "&&",
-                   left: {
-                     type: "BinaryExpression",
-                     operator: ">=",
-                     left: {
-                       type: "Identifier",
-                       name: "x",
-                     },
-                     right: {
-                       type: "Identifier",
-                       name: "start",
-                     }
-                   },
-                   right: {
-                     type: "BinaryExpression",
-                     operator: "<=",
-                     left: {
-                       type: "Identifier",
-                       name: "x",
-                     },
-                     right: {
-                       type: "Identifier",
-                       name: "stop",
-                     }
-                   },
-                 }
-               }
-             }
-           ],
-         },
-         generator: false,
-         expression: false,
-         async: false
-       };
-       const stringGuard = {
-         type: "FunctionDeclaration",
-         id: {
-           type: "Identifier",
-           name: "isString",
-         },
-         params: [
-           {
-             type: "Identifier",
-             name: "x",
-           }
-         ],
-         body: errorGuardBody("string"),
-         generator: false,
-         expression: false,
-         async: false
-       };
-       const functionGuard = {
-         type: "FunctionDeclaration",
-         id: {
-           type: "Identifier",
-           name: "isFunction",
-         },
-         params: [
-           {
-             type: "Identifier",
-             name: "x",
-           }
-         ],
-         body: errorGuardBody("function"),
-         generator: false,
-         expression: false,
-         async: false
-       };
-       const anyGuard = {
-         type: "FunctionDeclaration",
-         id: {
-           type: "Identifier",
-           name: "isAny",
-         },
-         params: [],
-         body: {
-           type: "BlockStatement",
-           body: [
-             {
-               type: "ReturnStatement",
-               argument: {
-                 type: "Literal",
-                 value: true,
-               }
-             }
-           ],
-         },
-         generator: false,
-         expression: false,
-         async: false
-       };
-
-       const booleanGuardFactory = () => (tested) => (funcCall({
-         type: "Identifier",
-         name: "isBoolean",
-       }, tested));
-       const numberGuardFactory = () => (tested) => (funcCall({
-         type: "Identifier",
-         name: "isNumber",
-       }, tested));
-       const numberExactGuardFactory = (value) => (tested) => (funcCall({
-         type: "Identifier",
-         name: "isExactNumber",
-       }, tested, value));
-       const numberOpenIntervalGuardFactory = (from, to) => (tested) => (funcCall({
-         type: "Identifier",
-         name: "isNumberOpenInterval",
-       }, tested, from, to));
-       const numberClosedIntervalGuardFactory = (from, to) => (tested) => (funcCall({
-         type: "Identifier",
-         name: "isNumberClosedInterval",
-       }, tested, from, to));
-       const stringGuardFactory = () => (tested) => (funcCall({
-         type: "Identifier",
-         name: "isString",
-       }, tested));
-       const functionGuardFactory = () => (tested) => (funcCall({
-         type: "Identifier",
-         name: "isFunction",
-       }, tested));
-       const anyGuardFactory = () => (tested) => (funcCall({
-         type: "Identifier",
-         name: "isAny",
-       }, tested));
-
-       const types = ['Boolean', 'Number', 'ExactNumber', 'NumberOpenInterval', 'NumberClosedInterval', 'String', 'Function', 'Any'];
-       const guards = [booleanGuard, numberGuard, numberExactGuard, numberOpenIntervalGuard, numberClosedIntervalGuard, stringGuard, functionGuard, anyGuardFactory];
-       const factories = [booleanGuardFactory, numberGuardFactory, numberExactGuardFactory, numberOpenIntervalGuardFactory, numberClosedIntervalGuardFactory, stringGuardFactory, functionGuardFactory, anyGuardFactory];
-       const typeToIsUsed = new Map(types.map(type => [type, false]));
-       const typeToGuard = new Map(types.map((type, index) => [type, guards[index]]));
-       const typeToFactory = new Map(types.map((type, index) => [type, factories[index]]));
-
-       return {
-         registerTypeUsage: (type) => {
-           if (!types.includes(type)) return null;
-           typeToIsUsed.set(type, true);
-         },
-         getGuardFactory: (type, ...args) => {
-           if (!types.includes(type)) return null;
-           return typeToFactory.get(type)(...args);
-         },
-         getGuards: () => {
-           return types.filter(type => typeToIsUsed.get(type)).map(type => typeToGuard.get(type));
-         }
-       }
-     })();
-
-    function argNumber(n) {
-      return {
-        type: "BinaryExpression",
-        operator: "==",
-        left: {
-          type: "MemberExpression",
-          computed: false,
-          object: {
-            type: "Identifier",
-            name: "arguments",
+            ],
           },
-          property: {
-            type: "Identifier",
-            name: "length",
+          alternate: {
+            type: "BlockStatement",
+            body: [
+              {
+                type: "ExpressionStatement",
+                expression: throwStatement({
+                  type: "TemplateLiteral",
+                  quasis: [
+                    {
+                      type: "TemplateElement",
+                      value: {
+                        raw: `Expected parameter type: ${type}, but `,
+                      },
+                      tail: false,
+                    },
+                    {
+                      type: "TemplateElement",
+                      value: {
+                        raw: " was given.",
+                        cooked: " was given.",
+                      },
+                      tail: true,
+                    },
+                  ],
+                  expressions: [
+                    {
+                      type: "UnaryExpression",
+                      operator: "typeof",
+                      argument: {
+                        type: "Identifier",
+                        name: "x",
+                      },
+                      prefix: true,
+                    },
+                  ],
+                }),
+              },
+            ],
           },
         },
-        right: {
-          type: "Literal",
-          value: n,
+      ],
+    };
+  }
+
+  const typeHandler = (() => {
+    const booleanGuard = {
+      type: "FunctionDeclaration",
+      id: {
+        type: "Identifier",
+        name: "isBoolean",
+      },
+      params: [
+        {
+          type: "Identifier",
+          name: "x",
         },
-      };
-    }
-
-    function throwStatement(...args) {
-      return {
-        "type": "ThrowStatement",
-        "argument": {
-          "type": "NewExpression",
-          "callee": {
-            "type": "Identifier",
-            "name": "Error"
+      ],
+      body: errorGuardBody("boolean"),
+      generator: false,
+      expression: false,
+      async: false,
+    };
+    const numberGuard = {
+      type: "FunctionDeclaration",
+      id: {
+        type: "Identifier",
+        name: "isNumber",
+      },
+      params: [
+        {
+          type: "Identifier",
+          name: "x",
+        },
+      ],
+      body: errorGuardBody("number"),
+      generator: false,
+      expression: false,
+      async: false,
+    };
+    const numberExactGuard = {
+      type: "FunctionDeclaration",
+      id: {
+        type: "Identifier",
+        name: "isExactNumber",
+      },
+      params: [
+        {
+          type: "Identifier",
+          name: "x",
+        },
+        {
+          type: "Identifier",
+          name: "value",
+        },
+      ],
+      body: {
+        type: "BlockStatement",
+        body: [
+          {
+            type: "ReturnStatement",
+            argument: {
+              type: "LogicalExpression",
+              operator: "&&",
+              left: {
+                type: "BinaryExpression",
+                operator: "===",
+                left: {
+                  type: "UnaryExpression",
+                  operator: "typeof",
+                  argument: {
+                    type: "Identifier",
+                    name: "x",
+                  },
+                  prefix: true,
+                },
+                right: {
+                  type: "Literal",
+                  value: "number",
+                },
+              },
+              right: {
+                type: "BinaryExpression",
+                operator: "===",
+                left: {
+                  type: "Identifier",
+                  name: "x",
+                },
+                right: {
+                  type: "Identifier",
+                  name: "value",
+                },
+              },
+            },
           },
-          "arguments": args
-        }
-      }
-    }
+        ],
+      },
+      generator: false,
+      expression: false,
+      async: false,
+    };
+    const numberOpenIntervalGuard = {
+      type: "FunctionDeclaration",
+      id: {
+        type: "Identifier",
+        name: "isNumberOpenInterval",
+      },
+      params: [
+        {
+          type: "Identifier",
+          name: "x",
+        },
+        {
+          type: "Identifier",
+          name: "start",
+        },
+        {
+          type: "Identifier",
+          name: "stop",
+        },
+      ],
+      body: {
+        type: "BlockStatement",
+        body: [
+          {
+            type: "ReturnStatement",
+            argument: {
+              type: "LogicalExpression",
+              operator: "&&",
+              left: {
+                type: "BinaryExpression",
+                operator: "===",
+                left: {
+                  type: "UnaryExpression",
+                  operator: "typeof",
+                  argument: {
+                    type: "Identifier",
+                    name: "x",
+                  },
+                  prefix: true,
+                },
+                right: {
+                  type: "Literal",
+                  value: "number",
+                },
+              },
+              right: {
+                type: "LogicalExpression",
+                operator: "&&",
+                left: {
+                  type: "BinaryExpression",
+                  operator: ">",
+                  left: {
+                    type: "Identifier",
+                    name: "x",
+                  },
+                  right: {
+                    type: "Identifier",
+                    name: "start",
+                  },
+                },
+                right: {
+                  type: "BinaryExpression",
+                  operator: "<",
+                  left: {
+                    type: "Identifier",
+                    name: "x",
+                  },
+                  right: {
+                    type: "Identifier",
+                    name: "stop",
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+      generator: false,
+      expression: false,
+      async: false,
+    };
+    const numberClosedIntervalGuard = {
+      type: "FunctionDeclaration",
+      id: {
+        type: "Identifier",
+        name: "isNumberClosedInterval",
+      },
+      params: [
+        {
+          type: "Identifier",
+          name: "x",
+        },
+        {
+          type: "Identifier",
+          name: "start",
+        },
+        {
+          type: "Identifier",
+          name: "stop",
+        },
+      ],
+      body: {
+        type: "BlockStatement",
+        body: [
+          {
+            type: "ReturnStatement",
+            argument: {
+              type: "LogicalExpression",
+              operator: "&&",
+              left: {
+                type: "BinaryExpression",
+                operator: "===",
+                left: {
+                  type: "UnaryExpression",
+                  operator: "typeof",
+                  argument: {
+                    type: "Identifier",
+                    name: "x",
+                  },
+                  prefix: true,
+                },
+                right: {
+                  type: "Literal",
+                  value: "number",
+                },
+              },
+              right: {
+                type: "LogicalExpression",
+                operator: "&&",
+                left: {
+                  type: "BinaryExpression",
+                  operator: ">=",
+                  left: {
+                    type: "Identifier",
+                    name: "x",
+                  },
+                  right: {
+                    type: "Identifier",
+                    name: "start",
+                  },
+                },
+                right: {
+                  type: "BinaryExpression",
+                  operator: "<=",
+                  left: {
+                    type: "Identifier",
+                    name: "x",
+                  },
+                  right: {
+                    type: "Identifier",
+                    name: "stop",
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+      generator: false,
+      expression: false,
+      async: false,
+    };
+    const stringGuard = {
+      type: "FunctionDeclaration",
+      id: {
+        type: "Identifier",
+        name: "isString",
+      },
+      params: [
+        {
+          type: "Identifier",
+          name: "x",
+        },
+      ],
+      body: errorGuardBody("string"),
+      generator: false,
+      expression: false,
+      async: false,
+    };
+    const functionGuard = {
+      type: "FunctionDeclaration",
+      id: {
+        type: "Identifier",
+        name: "isFunction",
+      },
+      params: [
+        {
+          type: "Identifier",
+          name: "x",
+        },
+      ],
+      body: errorGuardBody("function"),
+      generator: false,
+      expression: false,
+      async: false,
+    };
+    const anyGuard = {
+      type: "FunctionDeclaration",
+      id: {
+        type: "Identifier",
+        name: "isAny",
+      },
+      params: [],
+      body: {
+        type: "BlockStatement",
+        body: [
+          {
+            type: "ReturnStatement",
+            argument: {
+              type: "Literal",
+              value: true,
+            },
+          },
+        ],
+      },
+      generator: false,
+      expression: false,
+      async: false,
+    };
 
-    function ifStatement(conditions, body) {
+    const booleanGuardFactory = () => (tested) =>
+      funcCall(
+        {
+          type: "Identifier",
+          name: "isBoolean",
+        },
+        tested
+      );
+    const numberGuardFactory = () => (tested) =>
+      funcCall(
+        {
+          type: "Identifier",
+          name: "isNumber",
+        },
+        tested
+      );
+    const numberExactGuardFactory = (value) => (tested) =>
+      funcCall(
+        {
+          type: "Identifier",
+          name: "isExactNumber",
+        },
+        tested,
+        value
+      );
+    const numberOpenIntervalGuardFactory = (from, to) => (tested) =>
+      funcCall(
+        {
+          type: "Identifier",
+          name: "isNumberOpenInterval",
+        },
+        tested,
+        from,
+        to
+      );
+    const numberClosedIntervalGuardFactory = (from, to) => (tested) =>
+      funcCall(
+        {
+          type: "Identifier",
+          name: "isNumberClosedInterval",
+        },
+        tested,
+        from,
+        to
+      );
+    const stringGuardFactory = () => (tested) =>
+      funcCall(
+        {
+          type: "Identifier",
+          name: "isString",
+        },
+        tested
+      );
+    const functionGuardFactory = () => (tested) =>
+      funcCall(
+        {
+          type: "Identifier",
+          name: "isFunction",
+        },
+        tested
+      );
+    const anyGuardFactory = () => (tested) =>
+      funcCall(
+        {
+          type: "Identifier",
+          name: "isAny",
+        },
+        tested
+      );
+
+    const types = [
+      "Boolean",
+      "Number",
+      "ExactNumber",
+      "NumberOpenInterval",
+      "NumberClosedInterval",
+      "String",
+      "Function",
+      "Any",
+    ];
+    const guards = [
+      booleanGuard,
+      numberGuard,
+      numberExactGuard,
+      numberOpenIntervalGuard,
+      numberClosedIntervalGuard,
+      stringGuard,
+      functionGuard,
+      anyGuardFactory,
+    ];
+    const factories = [
+      booleanGuardFactory,
+      numberGuardFactory,
+      numberExactGuardFactory,
+      numberOpenIntervalGuardFactory,
+      numberClosedIntervalGuardFactory,
+      stringGuardFactory,
+      functionGuardFactory,
+      anyGuardFactory,
+    ];
+    const typeToIsUsed = new Map(types.map((type) => [type, false]));
+    const typeToGuard = new Map(
+      types.map((type, index) => [type, guards[index]])
+    );
+    const typeToFactory = new Map(
+      types.map((type, index) => [type, factories[index]])
+    );
+
+    return {
+      registerTypeUsage: (type) => {
+        if (!types.includes(type)) return null;
+        typeToIsUsed.set(type, true);
+      },
+      getGuardFactory: (type, ...args) => {
+        if (!types.includes(type)) return null;
+        return typeToFactory.get(type)(...args);
+      },
+      getGuards: () => {
+        return types
+          .filter((type) => typeToIsUsed.get(type))
+          .map((type) => typeToGuard.get(type));
+      },
+    };
+  })();
+
+  function argNumber(n) {
+    return {
+      type: "BinaryExpression",
+      operator: "==",
+      left: {
+        type: "MemberExpression",
+        computed: false,
+        object: {
+          type: "Identifier",
+          name: "arguments",
+        },
+        property: {
+          type: "Identifier",
+          name: "length",
+        },
+      },
+      right: {
+        type: "Literal",
+        value: n,
+      },
+    };
+  }
+
+  function throwStatement(...args) {
+    return {
+      type: "ThrowStatement",
+      argument: {
+        type: "NewExpression",
+        callee: {
+          type: "Identifier",
+          name: "Error",
+        },
+        arguments: args,
+      },
+    };
+  }
+
+  function ifStatement(conditions, body) {
     return {
       type: "IfStatement",
-      test: conditions.length === 1 ? conditions[0] : conditions.reduce((acc, val) => {
-        return {
-          type: "LogicalExpression",
-          operator: "&&",
-          left: acc,
-          right: val,
-        }
-      }),
+      test:
+        conditions.length === 1
+          ? conditions[0]
+          : conditions.reduce((acc, val) => {
+              return {
+                type: "LogicalExpression",
+                operator: "&&",
+                left: acc,
+                right: val,
+              };
+            }),
       consequent: {
         type: "BlockStatement",
         body: body,
@@ -3254,7 +3707,7 @@ function peg$parse(input, options) {
 
     funNames.forEach((name) => {
       var currentFunc = map.get(name);
-      const body = []
+      const body = [];
       var myFunc = {
         type: "FunctionDeclaration",
         id: {
@@ -3286,13 +3739,15 @@ function peg$parse(input, options) {
         }
 
         var ifSt = ifStatement(
-          [argNumber(currentFunc.functions[i].params.length),
-          ...currentFunc.functions[i].types.map((typeFactory, index) => {
-            return typeFactory({
-              type: "Identifier",
-              name: `p${index + 1}`
-            })
-          })],
+          [
+            argNumber(currentFunc.functions[i].params.length),
+            ...currentFunc.functions[i].types.map((typeFactory, index) => {
+              return typeFactory({
+                type: "Identifier",
+                name: `p${index + 1}`,
+              });
+            }),
+          ],
           currentFunc.functions[i].body.body
         );
 
@@ -3309,161 +3764,158 @@ function peg$parse(input, options) {
     return newTree;
   };
 
-     function extractList(list, index) {
-      return list.map(function(element) { return element[index]; });
+  function extractList(list, index) {
+    return list.map(function (element) {
+      return element[index];
+    });
+  }
+
+  function buildList(head, tail, index) {
+    return [head].concat(extractList(tail, index));
+  }
+  function optionalList(value) {
+    return value !== null ? value : [];
+  }
+  function binaryExp(sign, val1, val2) {
+    var obj = {
+      type: "BinaryExpression",
+      operator: sign,
+      left: val1,
+      right: val2,
+    };
+    return obj;
+  }
+
+  function funDeclaration(funcName, par, res, types) {
+    var ops = [];
+    var params = [];
+
+    for (var i = 0; i < par.length; i++) {
+      params.push(par[i][0]);
     }
 
-    function buildList(head, tail, index) {
-      return [head].concat(extractList(tail, index));
-    }
-    function optionalList(value) {
-      return value !== null ? value : [];
-    }
-    function binaryExp(sign, val1, val2) {
-      var obj = {
-          "type": "BinaryExpression",
-          "operator": sign,
-          "left": val1,
-          "right": val2 
+    if (res[0].length > 0) {
+      for (var i = 0; i < res[0].length; i++) {
+        ops.push(res[0][i]);
       }
-      return obj;
     }
+    ops.push(res[1]);
 
-    function funDeclaration(funcName, par, res, types) {
-      
-      var ops = [];
-      var params = [];
+    var obj = {
+      type: "FunctionDeclaration",
+      id: funcName,
+      params: params,
+      body: {
+        type: "BlockStatement",
+        body: ops,
+      },
+      generator: false,
+      expression: false,
+      async: false,
+    };
 
-      for (var i = 0; i < par.length; i++) {
-        params.push(par[i][0])
-      }
+    obj = types ? { ...obj, types } : obj;
 
-      if (res[0].length > 0) {
-        for (var i = 0; i < res[0].length; i++) {
-          ops.push(res[0][i]);
-        }
-      }
-      ops.push(res[1]);
+    return obj;
+  }
 
-      var obj = {
-        type: "FunctionDeclaration",
-        id: funcName,
-        params: params,
-        body: {
-          type: "BlockStatement",
-          "body": ops
+  function expStatement(funcName, ...args) {
+    var obj = {
+      type: "ExpressionStatement",
+      expression: {
+        type: "CallExpression",
+        callee: funcName,
+        arguments: args,
+      },
+    };
+
+    return obj;
+  }
+
+  function funcCall(funcName, ...args) {
+    return {
+      type: "CallExpression",
+      callee: funcName,
+      arguments: args,
+    };
+  }
+
+  function varDeclaration(ident, binExp) {
+    var obj = {
+      type: "VariableDeclaration",
+      declarations: [
+        {
+          type: "VariableDeclarator",
+          id: ident,
+          init: binExp,
         },
-        "generator": false,
-        "expression": false,
-        "async": false,
-      }
+      ],
+      kind: "var",
+    };
+    return obj;
+  }
 
-      obj = types ? {...obj, types} : obj;
+  function varAssignment(ident, expression) {
+    var obj = {
+      type: "ExpressionStatement",
+      expression: {
+        type: "AssignmentExpression",
+        operator: "=",
+        left: ident,
+        right: expression,
+      },
+    };
 
-      return obj;
-    }
+    return obj;
+  }
 
-    function expStatement(funcName, ...args) {
-      var obj = {
-        "type": "ExpressionStatement",
-        "expression": {
-          "type": "CallExpression",
-          "callee": funcName,
-          "arguments": args
-        }
-      }
+  function retStatement(ops) {
+    var obj = {
+      type: "ReturnStatement",
+      argument: ops,
+    };
+    return obj;
+  }
 
-      return obj;
-    }
+  function literal(val) {
+    var obj = { type: "Literal", value: val };
+    return obj;
+  }
 
-    function funcCall(funcName, ...args) {
-      return {
-          "type": "CallExpression",
-          "callee": funcName,
-          "arguments": args
-        }
-    }
+  function negativeLiteral(val) {
+    return {
+      type: "UnaryExpression",
+      operator: "-",
+      argument: {
+        type: "Literal",
+        value: val,
+      },
+      prefix: true,
+    };
+  }
 
-    function varDeclaration(ident, binExp) {
-      var obj = {
-        "type": "VariableDeclaration",
-        "declarations": [
-          {
-            "type": "VariableDeclarator",
-            "id": ident,
-            "init": binExp
-          }
-        ],
-        "kind": "var",
-      }
-      return obj;
-    }
-
-    function varAssignment(ident, expression) {
-      var obj = {
-        "type": "ExpressionStatement",
-        "expression": {
-          "type": "AssignmentExpression",
-          "operator": "=",
-          "left": ident,
-          "right": expression
-        }
-      }
-
-      return obj;
-    }
-
-    function retStatement(ops) {
-      var obj = {
-        "type": "ReturnStatement",
-        "argument": ops
-      }
-      return obj;
-    }
-
-    function literal(val) {
-      var obj = { type: "Literal", value: val }
-      return obj;
-    }
-
-    function negativeLiteral(val) {
-      return {
-        "type": "UnaryExpression",
-        "operator": "-",
-        "argument": {
-          "type": "Literal",
-          "value": val
-        },
-        "prefix": true
-      }
-    }
-
-    function print(exp) {
-      var obj = {
-        "type": "ExpressionStatement",
-        "expression": {
-          "type": "CallExpression",
-          "callee": {
-            "type": "MemberExpression",
-            "computed": false,
-            "object": {
-              "type": "Identifier",
-              "name": "console"
-            },
-            "property": {
-              "type": "Identifier",
-              "name": "log"
-            }
+  function print(exp) {
+    var obj = {
+      type: "ExpressionStatement",
+      expression: {
+        type: "CallExpression",
+        callee: {
+          type: "MemberExpression",
+          computed: false,
+          object: {
+            type: "Identifier",
+            name: "console",
           },
-          arguments: [
-            exp
-          ]
-        }
-      }
-      return obj;
-    }
-      
-
+          property: {
+            type: "Identifier",
+            name: "log",
+          },
+        },
+        arguments: [exp],
+      },
+    };
+    return obj;
+  }
 
   peg$result = peg$startRuleFunction();
 
@@ -3486,5 +3938,5 @@ function peg$parse(input, options) {
 
 module.exports = {
   SyntaxError: peg$SyntaxError,
-  parse:       peg$parse
+  parse: peg$parse,
 };
