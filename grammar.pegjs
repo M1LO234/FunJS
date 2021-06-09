@@ -779,9 +779,7 @@ Start = _ program:Program _ { return program; }
 ArithmeticsStatements
   = AddStatement
   / SubStatement
-  / MulStatement
-  / DivStatement
-  / PowStatement
+  / FactorExp
   / SingleLiteral
 
 InnerStatements
@@ -822,29 +820,49 @@ ConcatExpression
     return binaryExp("+", val1, val2);
   }
 
+AddSubExp
+  = AddStatement
+  / SubStatement
+
+MulDivExp
+  = MulStatement
+  / DivStatement
+  / FactorExp
+
+FactorExp
+  = Identifier
+  / NumberLiteral
+  / ExpressionBrackets
+
+ExpressionBrackets
+  = LeftBrace exp:ArithmeticsStatements RightBrace _ {
+    return exp;
+  }
+
 AddStatement
-  = val1:NumericLiteral _ Plus _ val2:ArithmeticsStatements _ {
+  = val1:MulDivExp _ Plus _ val2:AddSubExp _ {
+    return binaryExp("+", val1, val2);
+  } /
+  val1:MulDivExp _ Plus _ val2:MulDivExp _ {
     return binaryExp("+", val1, val2);
   }
 
 SubStatement
-  = val1:NumericLiteral _ Minus _ val2:ArithmeticsStatements _ {
+  = val1:MulDivExp _ Minus _ val2:AddSubExp _ {
+    return binaryExp("-", val1, val2);
+  } /
+  val1:MulDivExp _ Minus _ val2:MulDivExp _ {
     return binaryExp("-", val1, val2);
   }
 
 MulStatement
-  = val1:NumericLiteral _ Multiplication _ val2:ArithmeticsStatements _ {
+  = val1:FactorExp _ Multiplication _ val2:MulDivExp _ {
     return binaryExp("*", val1, val2);
   }
 
 DivStatement
-  = val1:NumericLiteral _ Division _ val2:ArithmeticsStatements _ {
+  = val1:FactorExp _ Division _ val2:MulDivExp _ {
     return binaryExp("/", val1, val2);
-  }
-
-PowStatement
-  = val1:NumericLiteral _ Power _ val2:ArithmeticsStatements _ {
-    return binaryExp("**", val1, val2);
   }
 
 VariableDeclaration
